@@ -1,0 +1,52 @@
+/* Crane Transport Optimization */
+/* Author: Bartosz Michalak */
+
+param cost_I := 10;
+
+set Locations := Opole Brzeg Nysa Prudnik Strzelce_Opolskie Kozle Raciborz;
+
+param demand_I :=
+    Opole 0
+    Brzeg 10
+    Nysa 0
+    Prudnik 4
+    Strzelce_Opolskie 0
+    Kozle 8
+    Raciborz 0;
+
+param demand_II :=
+    Opole 2
+    Brzeg 0
+    Nysa 0
+    Prudnik 0
+    Strzelce_Opolskie 4
+    Kozle 2
+    Raciborz 1;
+
+param supply_I :=
+    Opole 7
+    Brzeg 0
+    Nysa 6
+    Prudnik 0
+    Strzelce_Opolskie 5
+    Kozle 0
+    Raciborz 0;
+
+param supply_II :=
+    Opole 0
+    Brzeg 1
+    Nysa 2
+    Prudnik 10
+    Strzelce_Opolskie 0
+    Kozle 0
+    Raciborz 0;
+
+param dist:
+                                Opole  Brzeg  Nysa  Prudnik  Strzelce_Opolskie  Kozle  Raciborz :=
+    Opole                          0     44    59      52         33             48         78
+    Brzeg                         44      0    54      80         99             95        128
+    Nysa                          59     54     0      27         96             70         88
+    Prudnik                       52     80    27       0         69             45         62
+    Strzelce_Opolskie             33     99    96      69          0             29         61
+    Kozle                         48     95    70      45         29              0         35
+    Raciborz                      78    128    88      62         61             35          0;
