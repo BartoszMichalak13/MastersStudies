@@ -1,0 +1,24 @@
+/* The Rafinery Optimization Problem */
+/* Author: Bartosz Michalak */
+
+set Destilation_products := Benzin Oil Destilate Leftovers;
+set Cracking_products := Benzin Oil Leftovers;
+set End_products := Benzin Home_Benzin_Oil Heavy_Oil_Benzin;
+
+param cost_to_buy_B1 := 1300;
+param cost_to_buy_B2 := 1500;
+
+param cost_of_destilation := 10;
+param cost_of_cracking := 20;
+
+param planned_benzin_production := 200000;
+param planned_oil_production := 400000;
+param planned_heavy_oil_benzin_production := 250000;
+
+param accepted_sulfur_level := 0.005;
+param destilate_B1_benzin_sulfur_level := 0.002;
+param destilate_B2_benzin_sulfur_level := 0.012;
+param cracking_B1_benzin_sulfur_level := 0.003;
+param cracking_B2_benzin_sulfur_level := 0.025;
+
+
