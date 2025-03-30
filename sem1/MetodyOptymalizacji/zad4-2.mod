@@ -19,6 +19,14 @@ maximize TotalPreference:
 s.t. OneGroupPerSubject{s in Subjects}:
     sum{g in Groups} Chosen_Courses[g,s] = 1;
 
+s.t. NoOverlap{s1 in Subjects, g1 in Groups, s2 in Subjects, g2 in Groups:
+    (s1 <> s2) and (
+      ((StartTime[g1,s1] < StartTime[g2,s2]) and (EndTime[g2,s2] < EndTime[g1,s1])) or
+      ((StartTime[g2,s2] < StartTime[g1,s1]) and (EndTime[g1,s1] < EndTime[g2,s2])) or
+      ((StartTime[g1,s1] < EndTime[g2,s2]) and (EndTime[g2,s2] < EndTime[g1,s1])) or
+      ((StartTime[g2,s2] < EndTime[g1,s1]) and (EndTime[g1,s1] < EndTime[g2,s2])))}:
+    Chosen_Courses[g1,s1] + Chosen_Courses[g2,s2] <= 1;
+
 # Constraint: No more than 4 hours per day
 s.t. DailyHourLimit{d in Days}:
     sum{s in Subjects, g in Groups: (ClassDay[g,s] == d)}
