@@ -49,17 +49,25 @@ param cracking_B1_benzin_sulfur_level;
 param cracking_B2_benzin_sulfur_level;
 
 /* Decision variables: Amount of Crude Oil purchased */
-var B1 integer >= 0;
-var B2 integer >= 0;
+# var B1 integer >= 0;
+# var B2 integer >= 0;
+# # Zastanow sie czy musi byc int
+# var B1_Destilate integer >= 0;
+# var B2_Destilate integer >= 0;
+# var B1_Used_For_Home_Oil integer >= 0;
+# var B2_Used_For_Home_Oil integer >= 0;
+
+var B1 >= 0;
+var B2 >= 0;
 # Zastanow sie czy musi byc int
-var B1_Destilate integer >= 0;
-var B2_Destilate integer >= 0;
-var B1_Used_For_Home_Oil integer >= 0;
-var B2_Used_For_Home_Oil integer >= 0;
+var B1_Destilate >= 0;
+var B2_Destilate >= 0;
+var B1_Used_For_Home_Oil >= 0;
+var B2_Used_For_Home_Oil >= 0;
 
 minimize Total_Cost:
-    B1 * cost_to_buy_B1 * cost_of_destilation +
-    B2 * cost_to_buy_B2 * cost_of_destilation +
+    B1 * (cost_to_buy_B1 + cost_of_destilation) +
+    B2 * (cost_to_buy_B2 + cost_of_destilation) +
     B1_Destilate * cost_of_cracking +
     B2_Destilate * cost_of_cracking;
 
