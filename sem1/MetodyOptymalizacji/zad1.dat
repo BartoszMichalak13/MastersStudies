@@ -1,4 +1,4 @@
 /* Hilbert Matrix LP Problem - Task 1 */
 /* Author: Bartosz Michalak */
 
-param n := 8; # works for 7 but not for 8
+param n := 7; # works for 7 but not for 8

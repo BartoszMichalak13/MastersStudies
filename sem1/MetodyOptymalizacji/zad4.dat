@@ -1,3 +1,5 @@
+/* Student Schedule Optimization */
+/* Author: Bartosz Michalak */
 set Subjects := Algebra, Analysis, Physics, Mineral_Chemistry, Organic_Chemistry;
 set Groups := I, II, III, IV;
 set Days := Mon, Tue, Wen, Thu, Fri;

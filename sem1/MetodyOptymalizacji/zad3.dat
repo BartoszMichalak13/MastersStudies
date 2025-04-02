@@ -1,10 +1,6 @@
 /* The Rafinery Optimization Problem */
 /* Author: Bartosz Michalak */
 
-set Destilation_products := Benzin Oil Destilate Leftovers;
-set Cracking_products := Benzin Oil Leftovers;
-set End_products := Benzin Home_Benzin_Oil Heavy_Oil_Benzin;
-
 param cost_to_buy_B1 := 1300;
 param cost_to_buy_B2 := 1500;
 
