@@ -228,20 +228,30 @@ int main() {
   vector<int> ns = {100, 500, 1000, 5000, 10000, 50000, 100000};
   vector<string> strategies = {"NoReorder", "MoveToFront", "Transpose", "Count"};
 
+  const int number_of_experiments = 100;
   // Perform experiments for different list sizes and distributions
   for (int n : ns) {
     for (const auto& dist : distributions) {
       for (const string& strategy : strategies) {
-        LinkedList list;
-        int total_cost = 0;
+        double avg_cost = 0.0;
+        double tmp_cost = 0.0;
+        for (int j = 0; j < number_of_experiments; j++) {
+          LinkedList list;
+          int total_cost = 0;
 
-        // Run `n` Access operations with random X
-        for (int i = 0; i < n; ++i) {
-          int x = dist.second(rd);  // Get random value using distribution
-          total_cost += list.access(x, strategy);
+          // Run `n` Access operations with random X
+          for (int i = 0; i < n; ++i) {
+            int x = dist.second(rd);  // Get random value using distribution
+            total_cost += list.access(x, strategy);
+          }
+
+          // double avg_cost = static_cast<double>(total_cost) / n;
+          tmp_cost += static_cast<double>(total_cost) / n;
+          // cout << "tmp_cost " << tmp_cost << "\n";
+
         }
-
-        double avg_cost = static_cast<double>(total_cost) / n;
+        cout << "n " << n << "\n";
+        avg_cost = tmp_cost/number_of_experiments;
         output << n << "," << strategy << "," << avg_cost << "," << dist.first << "\n";
       }
     }
