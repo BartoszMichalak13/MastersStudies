@@ -1,5 +1,7 @@
 use std::env;
 
+//dopisac back tracking - wypisywanie najdluzszego wspolnego podciagu
+
 fn lcs3(a: &str, b: &str, c: &str) -> usize {
   let (la, lb, lc) = (a.len(), b.len(), c.len());
   let (a, b, c): (Vec<_>, Vec<_>, Vec<_>) =
@@ -25,6 +27,25 @@ fn lcs3(a: &str, b: &str, c: &str) -> usize {
       }
     }
   }
+  let mut i = la;
+  let mut j = lb;
+  let mut k = lc;
+  let mut result = vec![];
+  while i > 0 && j > 0 && k > 0 {
+    if a[i - 1] == b[j - 1] && b[j - 1] == c[k - 1] {
+      result.push(a[i - 1]);
+      i -= 1;
+      j -= 1;
+      k -= 1;
+    } else if dp[i][j][k] == dp[i - 1][j][k] {
+      i -= 1;
+    } else if dp[i][j][k] == dp[i][j - 1][k] {
+      j -= 1;
+    } else {
+      k -= 1;
+    }
+  }
+  println!("Najdłuższy wspólny podciąg: {}", result.iter().rev().collect::<String>());
 
   dp[la][lb][lc]
 }

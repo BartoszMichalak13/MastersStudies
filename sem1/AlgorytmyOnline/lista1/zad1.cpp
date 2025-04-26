@@ -244,11 +244,7 @@ int main() {
             int x = dist.second(rd);  // Get random value using distribution
             total_cost += list.access(x, strategy);
           }
-
-          // double avg_cost = static_cast<double>(total_cost) / n;
           tmp_cost += static_cast<double>(total_cost) / n;
-          // cout << "tmp_cost " << tmp_cost << "\n";
-
         }
         cout << "n " << n << "\n";
         avg_cost = tmp_cost/number_of_experiments;

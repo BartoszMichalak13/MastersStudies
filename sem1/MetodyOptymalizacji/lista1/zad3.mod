@@ -82,6 +82,8 @@ s.t. sulfur_level:
 
 solve;
 
+#nie ilosc tylko liczba, nie tablicca, nazwy ładnie
+
 printf "Buy %.2f B1 crude oil\n", B1;
 printf "Buy %.2f B2 crude oil\n", B2;
 printf "Further destilate %.2f B1 destilate\n", B1_Destilate;

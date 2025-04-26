@@ -30,7 +30,7 @@ fn expected_lcs(n: usize) -> f64 {
   let mut count = 0;
 
   for i in 0..strings.len() {
-    for j in i..strings.len() {
+    for j in 0..strings.len() {
       total += lcs(&strings[i], &strings[j]);
       count += 1;
     }

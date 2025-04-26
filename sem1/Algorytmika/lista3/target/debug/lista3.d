@@ -1,0 +1,1 @@
+/home/bartek/Desktop/magisterka/sem1/Algorytmika/lista3/target/debug/lista3: /home/bartek/Desktop/magisterka/sem1/Algorytmika/lista3/src/main.rs /home/bartek/Desktop/magisterka/sem1/Algorytmika/lista3/src/zad11.rs /home/bartek/Desktop/magisterka/sem1/Algorytmika/lista3/src/zad12.rs

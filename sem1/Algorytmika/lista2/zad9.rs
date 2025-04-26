@@ -15,12 +15,15 @@ fn find_genes(dna: &str) -> Vec<&str> {
         let codon = &chars[i..i + 3].iter().collect::<String>();
         if stop_codons.contains(&codon.as_str()) {
           let gene = &dna[start..i + 3];
-          let u = &dna[start + 3..i];
+          // let u = &dna[start + 3..i];
+          let u = &dna[start + 3..i+2];
 
           if u.len() >= 30
             && !["ATG", "TAA", "TAG", "TGA"].iter().any(|&x| u.contains(x))
           {
             result.push(gene);
+          } else {
+            i -= 1;
           }
           break;
         }
@@ -43,7 +46,8 @@ fn main() {
     // "ATGCGATAGTAAATGCTAGTAGGATGCGTAA"  // Przykładowa sekwencja DNA
     // "ATGCGATAGTAAATGCTAGTAGGATGCGTAA"  // Przykładowa sekwencja DNA
     // "ATGCGATAGTAAATGCTAGTAGGATGCGTAA"  // Przykładowa sekwencja DNA
-    "ATGTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTAA"  // Przykładowa sekwencja DNA
+    // "ATGTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTAA"  // Przykładowa sekwencja DNA
+    "ATGATTTTTTTTTTTTTTTTTTTTTTTTTTTTTATTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTATGATTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTAA"  // Przykładowa sekwencja DNA
   } else {
     &args[0]
   };
