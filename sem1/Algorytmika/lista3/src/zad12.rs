@@ -146,6 +146,7 @@ pub fn run_task12() {
 
   // let strat_mean = mean_strat(&strat_samples);
   // let strat_var = variance_given_mean(&strat_samples, strat_mean);
+
   let strat_var1 = variance_given_mean_1(&strat_samples, mean_strat_1(&strat_samples));
   let strat_var2 = variance_given_mean_2(&strat_samples, mean_strat_2(&strat_samples));
 
@@ -163,4 +164,4 @@ pub fn run_task12() {
   println!("Antithetic Variates:   mean = {}, variance = {}", antithetic_mean, antithetic_var);
   println!("Exact value:                  {}", PI / 4.0);
 }
-Sampling:   mean = 0.784913, variance = 0.09376403417197782
+// Sampling:   mean = 0.784913, variance = 0.09376403417197782
