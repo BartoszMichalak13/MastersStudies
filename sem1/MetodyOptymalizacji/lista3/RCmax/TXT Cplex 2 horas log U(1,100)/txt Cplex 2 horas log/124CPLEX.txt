@@ -1,0 +1,172 @@
+
+Log started (V11.0.0) Sun Apr 13 13:00:03 2008
+
+Tried aggregator 1 time.
+Reduced MIP has 120 rows, 2001 columns, and 4020 nonzeros.
+Presolve time =    0.02 sec.
+Clique table members: 100.
+MIP emphasis: balance optimality and feasibility.
+MIP search method: dynamic search.
+Parallel mode: none, using 1 thread.
+Root relaxation solution time =    0.03 sec.
+
+        Nodes                                         Cuts/
+   Node  Left     Objective  IInf  Best Integer     Best Node    ItCnt     Gap
+
+*     0+    0                         5456.0000       29.4078      375   99.46%
+*     0+    0                           40.0000       29.4078      375   26.48%
+      0     0       30.0000    41       40.0000     Fract: 10      425   25.00%
+*     0+    0                           39.0000       30.0000      425   23.08%
+      0     0       30.0000    39       39.0000       Cuts: 3      433   23.08%
+*     0+    0                           38.0000       30.0000      433   21.05%
+      0     0       30.0000    36       38.0000       Cuts: 2      442   21.05%
+*     0+    0                           37.0000       30.0000      442   18.92%
+      0     0       30.0000    40       37.0000       Cuts: 3      452   18.92%
+*     0+    0                           36.0000       30.0000      452   16.67%
+      0     0       30.0000    39       36.0000   Impl Bds: 1      469   16.67%
+*     0+    0                           35.0000       30.0000      469   14.29%
+
+Repeating presolve.
+Tried aggregator 1 time.
+MIP Presolve eliminated 2 rows and 1379 columns.
+Aggregator did 1 substitutions.
+Reduced MIP has 117 rows, 621 columns, and 1260 nonzeros.
+Tried aggregator 1 time.
+Represolve time =    0.03 sec.
+Clique table members: 287.
+MIP emphasis: balance optimality and feasibility.
+MIP search method: dynamic search.
+Parallel mode: none, using 1 thread.
+Root relaxation solution time =    0.02 sec.
+
+        Nodes                                         Cuts/
+   Node  Left     Objective  IInf  Best Integer     Best Node    ItCnt     Gap
+
+      0     0       30.0000    42       35.0000       30.0000      194   14.29%
+      0     2       30.0000    42       35.0000       30.0000      194   14.29%
+*    80+   59                           34.0000       30.2686     1199   10.97%
+    100    78       33.0000    49       34.0000       30.2686     1571   10.97%
+    200   160       33.0000    24       34.0000       31.0000     3030    8.82%
+    300   238       31.0000    74       34.0000       31.0000     4981    8.82%
+    400   321    infeasible             34.0000       31.0000     6986    8.82%
+    500   372       33.0000    66       34.0000       32.0000    11590    5.88%
+*   551+  218                           33.0000       32.0000    13660    3.03%
+    600   200        cutoff             33.0000       32.0000    18754    3.03%
+
+Clique cuts applied:  1
+Cover cuts applied:  207
+Implied bound cuts applied:  1
+Mixed integer rounding cuts applied:  23
+Zero-half cuts applied:  3
+Gomory fractional cuts applied:  7
+
+Solution pool: 9 solutions saved.
+
+MIP - Integer optimal solution:  Objective = 3.3000000000e+001
+Solution time =    6.36 sec.  Iterations = 22145  Nodes = 621 (168)
+
+
+Incumbent solution
+Variable Name           Solution Value
+Cmax                         33.000000
+X_1_4                         1.000000
+X_2_20                        1.000000
+X_3_16                        1.000000
+X_4_12                        1.000000
+X_5_13                        1.000000
+X_6_10                        1.000000
+X_7_2                         1.000000
+X_8_17                        1.000000
+X_9_13                        1.000000
+X_10_13                       1.000000
+X_11_3                        1.000000
+X_12_11                       1.000000
+X_13_6                        1.000000
+X_14_10                       1.000000
+X_15_5                        1.000000
+X_16_16                       1.000000
+X_17_6                        1.000000
+X_18_2                        1.000000
+X_19_5                        1.000000
+X_20_11                       1.000000
+X_21_4                        1.000000
+X_22_15                       1.000000
+X_23_4                        1.000000
+X_24_19                       1.000000
+X_25_19                       1.000000
+X_26_20                       1.000000
+X_27_1                        1.000000
+X_28_12                       1.000000
+X_29_4                        1.000000
+X_30_17                       1.000000
+X_31_5                        1.000000
+X_32_4                        1.000000
+X_33_9                        1.000000
+X_34_3                        1.000000
+X_35_1                        1.000000
+X_36_13                       1.000000
+X_37_20                       1.000000
+X_38_18                       1.000000
+X_39_7                        1.000000
+X_40_6                        1.000000
+X_41_1                        1.000000
+X_42_12                       1.000000
+X_43_2                        1.000000
+X_44_14                       1.000000
+X_45_8                        1.000000
+X_46_15                       1.000000
+X_47_15                       1.000000
+X_48_9                        1.000000
+X_49_12                       1.000000
+X_50_17                       1.000000
+X_51_3                        1.000000
+X_52_18                       1.000000
+X_53_6                        1.000000
+X_54_18                       1.000000
+X_55_1                        1.000000
+X_56_9                        1.000000
+X_57_4                        1.000000
+X_58_9                        1.000000
+X_59_16                       1.000000
+X_60_7                        1.000000
+X_61_12                       1.000000
+X_62_3                        1.000000
+X_63_9                        1.000000
+X_64_12                       1.000000
+X_65_16                       1.000000
+X_66_9                        1.000000
+X_67_17                       1.000000
+X_68_5                        1.000000
+X_69_7                        1.000000
+X_70_14                       1.000000
+X_71_11                       1.000000
+X_72_10                       1.000000
+X_73_19                       1.000000
+X_74_8                        1.000000
+X_75_20                       1.000000
+X_76_6                        1.000000
+X_77_2                        1.000000
+X_78_10                       1.000000
+X_79_1                        1.000000
+X_80_15                       1.000000
+X_81_17                       1.000000
+X_82_14                       1.000000
+X_83_17                       1.000000
+X_84_14                       1.000000
+X_85_13                       1.000000
+X_86_18                       1.000000
+X_87_10                       1.000000
+X_88_2                        1.000000
+X_89_15                       1.000000
+X_90_15                       1.000000
+X_91_2                        1.000000
+X_92_4                        1.000000
+X_93_18                       1.000000
+X_94_19                       1.000000
+X_95_13                       1.000000
+X_96_12                       1.000000
+X_97_4                        1.000000
+X_98_3                        1.000000
+X_99_12                       1.000000
+X_100_19                      1.000000
+All other variables in the range 1-2001 are 0.

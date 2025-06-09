@@ -1,8 +1,13 @@
 /sem1/.vscode/
 /.vscode/
 
+*bin/
+*target/
+
 *.out
 *.zip
 *.png
 *.csv
-*.toml
+*.o
+*.lock
+*.bin
