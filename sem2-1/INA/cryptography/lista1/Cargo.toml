@@ -1,0 +1,13 @@
+[package]
+name = "cryptography"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+hex = "0.4.3"
+md-5 = { path = "../hashes/md5"}
+md5md = { path = "../md5"}
+rand = "0.9.2"
+rang = "0.1.1"
