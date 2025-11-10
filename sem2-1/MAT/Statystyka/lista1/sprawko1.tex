@@ -1,0 +1,379 @@
+% !Rnw weave = knitr
+\documentclass[12pt]{article}\usepackage[]{graphicx}\usepackage[]{xcolor}
+% maxwidth is the original width if it is less than linewidth
+% otherwise use linewidth (to make sure the graphics do not exceed the margin)
+\makeatletter
+\def\maxwidth{ %
+  \ifdim\Gin@nat@width>\linewidth
+    \linewidth
+  \else
+    \Gin@nat@width
+  \fi
+}
+\makeatother
+
+\definecolor{fgcolor}{rgb}{0.345, 0.345, 0.345}
+\newcommand{\hlnum}[1]{\textcolor[rgb]{0.686,0.059,0.569}{#1}}%
+\newcommand{\hlsng}[1]{\textcolor[rgb]{0.192,0.494,0.8}{#1}}%
+\newcommand{\hlcom}[1]{\textcolor[rgb]{0.678,0.584,0.686}{\textit{#1}}}%
+\newcommand{\hlopt}[1]{\textcolor[rgb]{0,0,0}{#1}}%
+\newcommand{\hldef}[1]{\textcolor[rgb]{0.345,0.345,0.345}{#1}}%
+\newcommand{\hlkwa}[1]{\textcolor[rgb]{0.161,0.373,0.58}{\textbf{#1}}}%
+\newcommand{\hlkwb}[1]{\textcolor[rgb]{0.69,0.353,0.396}{#1}}%
+\newcommand{\hlkwc}[1]{\textcolor[rgb]{0.333,0.667,0.333}{#1}}%
+\newcommand{\hlkwd}[1]{\textcolor[rgb]{0.737,0.353,0.396}{\textbf{#1}}}%
+\let\hlipl\hlkwb
+
+\usepackage{framed}
+\makeatletter
+\newenvironment{kframe}{%
+ \def\at@end@of@kframe{}%
+ \ifinner\ifhmode%
+  \def\at@end@of@kframe{\end{minipage}}%
+  \begin{minipage}{\columnwidth}%
+ \fi\fi%
+ \def\FrameCommand##1{\hskip\@totalleftmargin \hskip-\fboxsep
+ \colorbox{shadecolor}{##1}\hskip-\fboxsep
+     % There is no \\@totalrightmargin, so:
+     \hskip-\linewidth \hskip-\@totalleftmargin \hskip\columnwidth}%
+ \MakeFramed {\advance\hsize-\width
+   \@totalleftmargin\z@ \linewidth\hsize
+   \@setminipage}}%
+ {\par\unskip\endMakeFramed%
+ \at@end@of@kframe}
+\makeatother
+
+\definecolor{shadecolor}{rgb}{.97, .97, .97}
+\definecolor{messagecolor}{rgb}{0, 0, 0}
+\definecolor{warningcolor}{rgb}{1, 0, 1}
+\definecolor{errorcolor}{rgb}{1, 0, 0}
+\newenvironment{knitrout}{}{} % an empty environment to be redefined in TeX
+
+\usepackage{alltt}
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[polish]{babel}
+\usepackage{geometry}
+\usepackage{graphicx}
+\usepackage{float}
+
+\DeclareUnicodeCharacter{03C0}{$\pi$}
+\DeclareUnicodeCharacter{03B1}{$\alpha$}  % α
+\DeclareUnicodeCharacter{03B2}{$\beta$}   % β
+\DeclareUnicodeCharacter{03B8}{$\theta$}  % θ
+\geometry{margin=2.5cm}
+
+\title{\textbf{Statystyka matematyczna - laboratorium nr 1}}
+\author{Bartosz Michalak}
+\date{\today}
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\begin{document}
+\maketitle
+
+\section*{Zadanie 1}
+
+Celem zadania jest porównanie dwóch estymatorów wariancji dla rozkładu Bernoulliego
+$\mathcal{B}(1, \vartheta)$:
+\[
+S_0^2 = \frac{1}{n} \sum_{i=1}^n (X_i - \overline{X})^2,
+\qquad
+S^2 = \frac{1}{n-1} \sum_{i=1}^n (X_i - \overline{X})^2.
+\]
+Pierwszy z nich jest estymatorem obciążonym, natomiast drugi — estymatorem nieobciążonym.
+Porównania dokonujemy na podstawie błędów średniokwadratowych (MSE), wyznaczonych metodą Monte Carlo
+dla różnych wartości $n$ i $\vartheta$.
+
+\subsection*{Opis metody}
+Generujemy $N$ niezależnych prób $\mathbf{X}^{(k)} = (X_1^{(k)}, \ldots, X_n^{(k)})$
+z rozkładu Bernoulliego $\mathcal{B}(1, \vartheta)$.
+Dla każdej próby obliczamy $S_0^2$ i $S^2$, a następnie wyznaczamy błędy średniokwadratowe:
+\[
+\text{MSE}(S_0^2) = \mathbb{E}\big[(S_0^2 - \vartheta(1 - \vartheta))^2\big],
+\qquad
+\text{MSE}(S^2) = \mathbb{E}\big[(S^2 - \vartheta(1 - \vartheta))^2\big].
+\]
+
+\subsection*{Kod w~R}
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hldef{monte_carlo_mse_bernoulli} \hlkwb{<-} \hlkwa{function}\hldef{(}\hlkwc{n}\hldef{,} \hlkwc{theta}\hldef{,} \hlkwc{nsim} \hldef{=} \hlnum{20000}\hldef{,} \hlkwc{seed} \hldef{=} \hlnum{12345}\hldef{) \{}
+  \hlkwd{set.seed}\hldef{(seed)}
+  \hldef{true_var} \hlkwb{<-} \hldef{theta} \hlopt{*} \hldef{(}\hlnum{1} \hlopt{-} \hldef{theta)}
+  \hldef{s2_0_vals} \hlkwb{<-} \hlkwd{numeric}\hldef{(nsim)}
+  \hldef{s2_vals}   \hlkwb{<-} \hlkwd{numeric}\hldef{(nsim)}
+  \hlkwa{for} \hldef{(i} \hlkwa{in} \hlkwd{seq_len}\hldef{(nsim)) \{}
+    \hldef{x} \hlkwb{<-} \hlkwd{rbinom}\hldef{(n,} \hlnum{1}\hldef{, theta)}
+    \hldef{xbar} \hlkwb{<-} \hlkwd{mean}\hldef{(x)}
+    \hldef{ssq} \hlkwb{<-} \hlkwd{sum}\hldef{((x} \hlopt{-} \hldef{xbar)}\hlopt{^}\hlnum{2}\hldef{)}
+    \hldef{s2_0_vals[i]} \hlkwb{<-} \hldef{ssq} \hlopt{/} \hldef{n}
+    \hldef{s2_vals[i]}   \hlkwb{<-} \hlkwa{if} \hldef{(n} \hlopt{>} \hlnum{1}\hldef{) ssq} \hlopt{/} \hldef{(n} \hlopt{-} \hlnum{1}\hldef{)} \hlkwa{else} \hlnum{NA}
+  \hldef{\}}
+  \hlkwd{list}\hldef{(}
+    \hlkwc{n} \hldef{= n,} \hlkwc{theta} \hldef{= theta,} \hlkwc{true_var} \hldef{= true_var,}
+    \hlkwc{mse_s2_0} \hldef{=} \hlkwd{mean}\hldef{((s2_0_vals} \hlopt{-} \hldef{true_var)}\hlopt{^}\hlnum{2}\hldef{,} \hlkwc{na.rm} \hldef{=} \hlnum{TRUE}\hldef{),}
+    \hlkwc{mse_s2}   \hldef{=} \hlkwd{mean}\hldef{((s2_vals} \hlopt{-} \hldef{true_var)}\hlopt{^}\hlnum{2}\hldef{,} \hlkwc{na.rm} \hldef{=} \hlnum{TRUE}\hldef{)}
+  \hldef{)}
+\hldef{\}}
+\end{alltt}
+\end{kframe}
+\end{knitrout}
+
+\subsection*{Wyniki}
+Eksperymenty przeprowadzono dla różnych wartości $n \in \{5, 10, 20, 50\}$
+oraz $\vartheta$ w przedziale $[0.01, 0.99]$ z krokiem co $0.01$.
+
+Wyniki wskazują, że estymator nieobciążony $S_0^2$
+zazwyczaj osiąga niższe wartości MSE w porównaniu do estymatora maksymalnej wiarygodności $S^2$,
+szczególnie dla mniejszych próbek i wartości $\vartheta$ bliskich 0 lub 1.
+
+% Dzieje się tak, ponieważ estymator $S_0^2$ koryguje obciążenie związane z małymi próbkami,
+% co prowadzi do bardziej dokładnych oszacowań wariancji w tych warunkach.
+
+Wraz ze wzrostem rozmiaru próby różnice w MSE między dwoma estymatorami maleją,
+co sugeruje, że oba estymatory stają się bardziej zbliżone w dużych próbkach.
+
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{figure}[H]
+
+{\centering \includegraphics[width=0.9\textwidth]{figure/zad1-wykres-plot-1} 
+
+}
+
+\caption[Porównanie błędów średniokwadratowych (MSE) estymatorów S\textsubscript{0}\textsuperscript{2} i S\textsuperscript{2} dla różnych wartości n i \(\vartheta\)]{Porównanie błędów średniokwadratowych (MSE) estymatorów S\textsubscript{0}\textsuperscript{2} i S\textsuperscript{2} dla różnych wartości n i \(\vartheta\)}\label{fig:zad1-wykres-plot}
+\end{figure}
+
+\end{knitrout}
+
+\section*{Zadanie 2}
+
+Rozważamy rozkład dwumianowy $\mathcal{B}(n, \theta)$ oraz rodzinę estymatorów:
+\[
+d_{a,b}(x) = \frac{x + a}{n + a + b},
+\]
+gdzie $a,b > 0$. Funkcją straty jest tzw. \textit{entropic loss} (lub log-loss):
+
+$$
+L(\theta, a) = \mathbb{E}_\theta \!\left[
+  \ln \frac{p_\theta(X)}{p_{a}(X)}
+\right],
+$$
+gdzie $p_\theta(X)$ to funkcja masy prawdopodobieństwa rozkładu $\mathrm{Bin}(n, \theta)$.
+Naszym celem jest wyznaczenie wartości funkcji ryzyka:
+$$
+R(\theta, d_{a,b}) = \mathbb{E}_\theta[L(\theta, d_{a,b}(X))].
+$$
+
+\subsection*{Rozwiązanie}
+
+Najpierw rozpiszmy funkcję straty:
+\[
+\begin{aligned}
+L(\theta, a)
+  &= \mathbb{E}_\theta \!\left[
+     \ln \frac{p_\theta(X)}{p_{a,b}(X)}
+  \right] \\[6pt]
+  &= \mathbb{E}_\theta \!\left[
+     \ln
+     \frac{\binom{n}{X} \theta^X (1-\theta)^{n-X}}
+          {\binom{n}{X} a^X (1-a)^{n-X}}
+  \right] \\[6pt]
+  &= \mathbb{E}_\theta \!\left[
+     X \ln \frac{\theta}{a} + (n - X)\ln \frac{1-\theta}{1-a}
+  \right].
+\end{aligned}
+\]
+
+Ponieważ $\mathbb{E}_\theta[X] = n\theta$, otrzymujemy
+\[
+L(\theta, a) = n\theta \ln \frac{\theta}{a}
++ n(1 - \theta)\ln \frac{1 - \theta}{1 - a}.
+\]
+
+Przejdźmy teraz do funkcji ryzyka:
+\[
+\begin{aligned}
+R(\theta, d_{a,b})
+  &= \mathbb{E}_\theta[L(\theta, d_{a,b}(X))] \\[4pt]
+  &= n\theta \, \mathbb{E}_\theta\!\left[
+     \ln \frac{\theta}{d_{a,b}(X)}
+  \right]
+  + n(1 - \theta)\, \mathbb{E}_\theta\!\left[
+     \ln \frac{1 - \theta}{1 - d_{a,b}(X)}
+  \right].
+\end{aligned}
+\]
+
+Podstawiając postać estymatora $d_{a,b}(X) = \frac{X + a}{n + a + b}$, mamy:
+\[
+\begin{aligned}
+R(\theta, d_{a,b})
+  &= n\theta\, \mathbb{E}_\theta\!\left[
+     \ln \frac{\theta (n + a + b)}{X + a}
+  \right]
+  + n(1 - \theta)\, \mathbb{E}_\theta\!\left[
+     \ln \frac{(1 - \theta)(n + a + b)}{n - X + b}
+  \right] \\[6pt]
+  &= n\theta \ln\!\big(\theta (n + a + b)\big)
+     + n(1 - \theta)\ln\!\big((1 - \theta)(n + a + b)\big) \\[4pt]
+  &\quad
+     - n\theta\, \mathbb{E}_\theta[\ln(X + a)]
+     - n(1 - \theta)\, \mathbb{E}_\theta[\ln(n - X + b)].
+\end{aligned}
+\]
+
+Ostatecznie otrzymujemy wzór:
+\[
+\begin{aligned}
+R(\theta, d_{a,b})
+&= n\theta \ln\!\big(\theta (n + a + b)\big)\\
+&+ n(1 - \theta)\ln\!\big((1 - \theta)(n + a + b)\big)\\
+&- n\theta\, \mathbb{E}_\theta[\ln(X + a)]\\
+&- n(1 - \theta)\, \mathbb{E}_\theta[\ln(n - X + b)].
+\end{aligned}
+\]
+Wartości oczekiwane $\mathbb{E}_\theta[\ln(X + a)]$ oraz $\mathbb{E}_\theta[\ln(n - X + b)]$
+można obliczyć numerycznie, korzystając z rozkładu dwumianowego:
+\[
+\mathbb{E}_\theta[f(X)] = \sum_{k=0}^n f(k)\,\mathrm{P}_\theta(X = k)
+= \sum_{k=0}^n f(k)\,\binom{n}{k}\theta^k(1-\theta)^{n-k}.
+\]
+
+
+\subsection*{Kod w~R}
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hldef{risk_entropy} \hlkwb{<-} \hlkwa{function}\hldef{(}\hlkwc{n}\hldef{,} \hlkwc{theta}\hldef{,} \hlkwc{a}\hldef{,} \hlkwc{b}\hldef{) \{}
+  \hldef{x} \hlkwb{<-} \hlnum{0}\hlopt{:}\hldef{n}
+  \hldef{pmf} \hlkwb{<-} \hlkwd{dbinom}\hldef{(x,} \hlkwc{size} \hldef{= n,} \hlkwc{prob} \hldef{= theta)}
+  \hldef{d_x} \hlkwb{<-} \hldef{(x} \hlopt{+} \hldef{a)} \hlopt{/} \hldef{(n} \hlopt{+} \hldef{a} \hlopt{+} \hldef{b)}
+  \hldef{eps} \hlkwb{<-} \hldef{.Machine}\hlopt{$}\hldef{double.eps}
+  \hldef{theta_clamped} \hlkwb{<-} \hlkwd{min}\hldef{(}\hlkwd{max}\hldef{(theta, eps),} \hlnum{1} \hlopt{-} \hldef{eps)}
+  \hldef{term1} \hlkwb{<-} \hldef{theta_clamped} \hlopt{*} \hlkwd{log}\hldef{(theta_clamped} \hlopt{/} \hldef{d_x)}
+  \hldef{term2} \hlkwb{<-} \hldef{(}\hlnum{1} \hlopt{-} \hldef{theta_clamped)} \hlopt{*} \hlkwd{log}\hldef{((}\hlnum{1} \hlopt{-} \hldef{theta_clamped)} \hlopt{/} \hldef{(}\hlnum{1} \hlopt{-} \hldef{d_x))}
+  \hldef{loss_x} \hlkwb{<-} \hldef{term1} \hlopt{+} \hldef{term2}
+  \hlkwd{sum}\hldef{(pmf} \hlopt{*} \hldef{loss_x)}
+\hldef{\}}
+
+\hldef{risk_curve} \hlkwb{<-} \hlkwa{function}\hldef{(}\hlkwc{n}\hldef{,} \hlkwc{a}\hldef{,} \hlkwc{b}\hldef{,}
+                       \hlkwc{thetas} \hldef{=} \hlkwd{seq}\hldef{(}\hlnum{0.001}\hldef{,} \hlnum{0.999}\hldef{,} \hlkwc{length.out} \hldef{=} \hlnum{301}\hldef{)) \{}
+  \hlkwd{sapply}\hldef{(thetas,} \hlkwa{function}\hldef{(}\hlkwc{th}\hldef{)} \hlkwd{risk_entropy}\hldef{(n, th, a, b))}
+\hldef{\}}
+\end{alltt}
+\end{kframe}
+\end{knitrout}
+
+
+\subsection*{Wyniki}
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{figure}[H]
+
+{\centering \includegraphics[width=0.8\textwidth]{figure/zad2-wykres-1} 
+
+}
+
+\caption[Porównanie funkcji ryzyka dla różnych wartości n]{Porównanie funkcji ryzyka dla różnych wartości n}\label{fig:zad2-wykres}
+\end{figure}
+
+\end{knitrout}
+
+Zauważamy, że:
+\begin{itemize}
+  \item Estymator $d_{1,1}$ ma stosunkowo płaską funkcję ryzyka — jest bardziej „równomierny” względem $\vartheta$.
+  \item Estymator $d_{n/2,n/2}$ osiąga mniejsze wartości ryzyka w pobliżu $\vartheta=0{.}5$, lecz większe przy skrajnych wartościach.
+  \item Wybór $a,b$ wpływa na kompromis między minimalizacją ryzyka globalnie a lokalnie w~okolicy konkretnej wartości $\vartheta$.
+\end{itemize}
+
+
+\section*{Zadanie 3}
+
+
+Kontynuując wątek z Zadania 2, zakładamy teraz, że parametr $\vartheta$ ma rozkład a priori
+\[
+\pi(\vartheta) = \mathrm{Beta}(\alpha, \beta),
+\]
+czyli gęstość prawdopodobieństwa
+\[
+h(\vartheta) = \frac{\vartheta^{\alpha - 1} (1-\vartheta)^{\beta - 1}}{B(\alpha, \beta)}, \qquad \vartheta \in [0,1],
+\]
+gdzie $B(\alpha, \beta)$ jest funkcją beta.
+
+Rozważamy rodzinę estymatorów
+\[
+d_{a,b}(x) = \frac{x + a}{n + a + b}, \qquad a,b > 0,
+\]
+dla próby $X \sim \mathcal{B}(n, \vartheta)$.
+
+Celem zadania jest znalezienie optymalnych wartości $(a^*, b^*)$, które minimalizują średnie ryzyko.
+
+
+\subsection*{Rozwiązanie}
+
+Średnie ryzyko można wyznaczyć numerycznie, korzystając z definicji:
+\[
+r(\pi, d_{a,b}) = \int_0^1 R(\vartheta, d_{a,b})\, h(\vartheta)\, d\vartheta,
+\]
+gdzie $R(\vartheta, d_{a,b})$ zostało wyprowadzone w Zadaniu 2.
+
+\subsection*{Kod w~R}
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hldef{expected_risk_prior} \hlkwb{<-} \hlkwa{function}\hldef{(}\hlkwc{n}\hldef{,} \hlkwc{a}\hldef{,} \hlkwc{b}\hldef{,}
+                                \hlkwc{alpha} \hldef{=} \hlnum{1}\hldef{,} \hlkwc{beta} \hldef{=} \hlnum{1}\hldef{,} \hlkwc{rel.tol} \hldef{=} \hlnum{1e-8}\hldef{) \{}
+  \hldef{integrand} \hlkwb{<-} \hlkwa{function}\hldef{(}\hlkwc{theta}\hldef{) \{}
+    \hlkwd{sapply}\hldef{(theta,} \hlkwa{function}\hldef{(}\hlkwc{th}\hldef{)}
+      \hlkwd{risk_entropy}\hldef{(n, th, a, b)} \hlopt{*} \hlkwd{dbeta}\hldef{(th,} \hlkwc{shape1} \hldef{= alpha,} \hlkwc{shape2} \hldef{= beta))}
+  \hldef{\}}
+  \hldef{res} \hlkwb{<-} \hlkwd{integrate}\hldef{(integrand,} \hlkwc{lower} \hldef{=} \hlnum{0}\hldef{,} \hlkwc{upper} \hldef{=} \hlnum{1}\hldef{,}
+                   \hlkwc{rel.tol} \hldef{= rel.tol,} \hlkwc{subdivisions} \hldef{=} \hlnum{200L}\hldef{)}
+  \hldef{res}\hlopt{$}\hldef{value}
+\hldef{\}}
+
+\hldef{optimize_ab_for_prior} \hlkwb{<-} \hlkwa{function}\hldef{(}\hlkwc{n}\hldef{,} \hlkwc{alpha} \hldef{=} \hlnum{1}\hldef{,} \hlkwc{beta} \hldef{=} \hlnum{1}\hldef{,}
+                                  \hlkwc{a_start} \hldef{=} \hlnum{1}\hldef{,} \hlkwc{b_start} \hldef{=} \hlnum{1}\hldef{,}
+                                  \hlkwc{lower} \hldef{=} \hlnum{1e-6}\hldef{,} \hlkwc{upper} \hldef{=} \hlnum{1000}\hldef{) \{}
+  \hldef{obj} \hlkwb{<-} \hlkwa{function}\hldef{(}\hlkwc{par}\hldef{) \{}
+    \hldef{a} \hlkwb{<-} \hldef{par[}\hlnum{1}\hldef{]; b} \hlkwb{<-} \hldef{par[}\hlnum{2}\hldef{]}
+    \hlkwa{if} \hldef{(a} \hlopt{<=} \hlnum{0} \hlopt{||} \hldef{b} \hlopt{<=} \hlnum{0}\hldef{)} \hlkwd{return}\hldef{(}\hlnum{1e10}\hldef{)}
+    \hlkwd{expected_risk_prior}\hldef{(n, a, b, alpha, beta)}
+  \hldef{\}}
+  \hldef{res} \hlkwb{<-} \hlkwd{optim}\hldef{(}\hlkwc{par} \hldef{=} \hlkwd{c}\hldef{(a_start, b_start),} \hlkwc{fn} \hldef{= obj,} \hlkwc{method} \hldef{=} \hlsng{"L-BFGS-B"}\hldef{,}
+               \hlkwc{lower} \hldef{=} \hlkwd{c}\hldef{(lower, lower),} \hlkwc{upper} \hldef{=} \hlkwd{c}\hldef{(upper, upper))}
+  \hlkwd{list}\hldef{(}\hlkwc{par} \hldef{= res}\hlopt{$}\hldef{par,} \hlkwc{value} \hldef{= res}\hlopt{$}\hldef{value,}
+       \hlkwc{convergence} \hldef{= res}\hlopt{$}\hldef{convergence,} \hlkwc{message} \hldef{= res}\hlopt{$}\hldef{message)}
+\hldef{\}}
+\end{alltt}
+\end{kframe}
+\end{knitrout}
+
+
+
+\subsection*{Wyniki}
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{figure}[H]
+
+{\centering \includegraphics[width=0.9\textwidth]{figure/zad3-wykres-1} 
+
+}
+
+\caption[Średnie ryzyko $r(\pi, d_{a,b})$ dla n = 10, α = 1, β = 1]{Średnie ryzyko $r(\pi, d_{a,b})$ dla n = 10, α = 1, β = 1. Czerwony punkt: optimum $(a^*, b^*)$.}\label{fig:zad3-wykres}
+\end{figure}
+
+\end{knitrout}
+
+Dla $\alpha = \beta = 1$ rozkład a priori $\pi$ jest jednostajny na przedziale $[0,1]$.
+W tym przypadku średnie ryzyko Bayesowskie osiąga minimum dla estymatora, który symetrycznie uwzględnia wszystkie możliwe wartości $\vartheta$.
+
+Optymalnym estymatorem Bayesowskim dla entropic loss jest
+\[
+d_{1,1}(X) = \frac{X + 1}{n + 2}.
+\]
+
+Wyniki numeryczne uzyskane z naszego programu potwierdzają tę obserwację. Dla $n=10$ optymalnie dobrane wartości parametrów $(a^*, b^*)$ są bardzo bliskie $1$
+co zgadza się z przewidywaniami teoretycznymi.
+\end{document}

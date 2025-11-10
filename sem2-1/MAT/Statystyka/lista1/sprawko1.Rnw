@@ -1,0 +1,431 @@
+% !Rnw weave = knitr
+\documentclass[12pt]{article}
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[polish]{babel}
+\usepackage{geometry}
+\usepackage{graphicx}
+\usepackage{float}
+
+\DeclareUnicodeCharacter{03C0}{$\pi$}
+\DeclareUnicodeCharacter{03B1}{$\alpha$}  % α
+\DeclareUnicodeCharacter{03B2}{$\beta$}   % β
+\DeclareUnicodeCharacter{03B8}{$\theta$}  % θ
+\geometry{margin=2.5cm}
+
+\title{\textbf{Statystyka matematyczna - laboratorium nr 1}}
+\author{Bartosz Michalak}
+\date{\today}
+
+
+\begin{document}
+\maketitle
+
+\section*{Zadanie 1}
+
+Celem zadania jest porównanie dwóch estymatorów wariancji dla rozkładu Bernoulliego
+$\mathcal{B}(1, \vartheta)$:
+\[
+S_0^2 = \frac{1}{n} \sum_{i=1}^n (X_i - \overline{X})^2,
+\qquad
+S^2 = \frac{1}{n-1} \sum_{i=1}^n (X_i - \overline{X})^2.
+\]
+Pierwszy z nich jest estymatorem obciążonym, natomiast drugi — estymatorem nieobciążonym.
+Porównania dokonujemy na podstawie błędów średniokwadratowych (MSE), wyznaczonych metodą Monte Carlo
+dla różnych wartości $n$ i $\vartheta$.
+
+\subsection*{Opis metody}
+Generujemy $N$ niezależnych prób $\mathbf{X}^{(k)} = (X_1^{(k)}, \ldots, X_n^{(k)})$
+z rozkładu Bernoulliego $\mathcal{B}(1, \vartheta)$.
+Dla każdej próby obliczamy $S_0^2$ i $S^2$, a następnie wyznaczamy błędy średniokwadratowe:
+\[
+\text{MSE}(S_0^2) = \mathbb{E}\big[(S_0^2 - \vartheta(1 - \vartheta))^2\big],
+\qquad
+\text{MSE}(S^2) = \mathbb{E}\big[(S^2 - \vartheta(1 - \vartheta))^2\big].
+\]
+
+\subsection*{Kod w~R}
+<<zad1-funkcja, echo=TRUE, results='hide'>>=
+monte_carlo_mse_bernoulli <- function(n, theta, nsim = 20000, seed = 12345) {
+  set.seed(seed)
+  true_var <- theta * (1 - theta)
+  s2_0_vals <- numeric(nsim)
+  s2_vals   <- numeric(nsim)
+  for (i in seq_len(nsim)) {
+    x <- rbinom(n, 1, theta)
+    xbar <- mean(x)
+    ssq <- sum((x - xbar)^2)
+    s2_0_vals[i] <- ssq / n
+    s2_vals[i]   <- if (n > 1) ssq / (n - 1) else NA
+  }
+  list(
+    n = n, theta = theta, true_var = true_var,
+    mse_s2_0 = mean((s2_0_vals - true_var)^2, na.rm = TRUE),
+    mse_s2   = mean((s2_vals - true_var)^2, na.rm = TRUE)
+  )
+}
+@
+
+\subsection*{Wyniki}
+Eksperymenty przeprowadzono dla różnych wartości $n \in \{5, 10, 20, 50\}$
+oraz $\vartheta$ w przedziale $[0.01, 0.99]$ z krokiem co $0.01$.
+
+Wyniki wskazują, że estymator nieobciążony $S_0^2$
+zazwyczaj osiąga niższe wartości MSE w porównaniu do estymatora maksymalnej wiarygodności $S^2$,
+szczególnie dla mniejszych próbek i wartości $\vartheta$ bliskich 0 lub 1.
+
+% Dzieje się tak, ponieważ estymator $S_0^2$ koryguje obciążenie związane z małymi próbkami,
+% co prowadzi do bardziej dokładnych oszacowań wariancji w tych warunkach.
+
+Wraz ze wzrostem rozmiaru próby różnice w MSE między dwoma estymatorami maleją,
+co sugeruje, że oba estymatory stają się bardziej zbliżone w dużych próbkach.
+
+<<zad1-wykres, echo=FALSE, message=FALSE, warning=FALSE, error=FALSE, results='hide'>>=
+
+library(ggplot2)
+library(reshape2)
+Sys.setlocale("LC_CTYPE", "pl_PL.UTF-8")
+
+example_compare_bernoulli_plot <- function() {
+  params <- expand.grid(n = c(5, 10, 20, 50),
+                        theta = seq(0.01, 0.99, by = 0.01))
+
+  out <- apply(params, 1, function(row) {
+    res <- monte_carlo_mse_bernoulli(
+      n = as.integer(row["n"]),
+      theta = as.numeric(row["theta"]),
+      nsim = 20000
+    )
+    c(n = res$n, theta = res$theta,
+      mse_s2_0 = res$mse_s2_0, mse_s2 = res$mse_s2)
+  })
+
+  out_df <- as.data.frame(t(out))
+  out_df$n <- as.integer(out_df$n)
+  out_df$theta <- as.numeric(out_df$theta)
+
+  plot_df <- melt(out_df,
+                  id.vars = c("n", "theta"),
+                  measure.vars = c("mse_s2_0", "mse_s2"),
+                  variable.name = "Estimator",
+                  value.name = "MSE")
+
+  plot_df$Estimator <- factor(plot_df$Estimator,
+                              levels = c("mse_s2_0", "mse_s2"),
+                              labels = c(expression(S[0]^2), expression(S^2)))
+
+  p <- ggplot(plot_df, aes(x = theta, y = MSE, color = Estimator)) +
+    geom_line(size = 1) +
+    facet_wrap(~ n, ncol = 2, labeller = label_bquote(n == .(n))) +
+    theme_minimal(base_size = 14) +
+    labs(
+      # title = paste("Porównanie MSE dla wybranych wartości n i ", expression(theta)),
+      x = expression(theta),
+      y = "MSE"
+    ) +
+    scale_color_manual(values = c("red", "blue"),
+                       labels = c(expression(S[0]^2), expression(S^2))) +
+    theme(
+      legend.position = "bottom",
+      legend.title = element_blank(),
+      plot.title = element_text(hjust = 0.5)
+    )
+  print(p)
+}
+@
+<<zad1-wykres-plot, echo=FALSE, warning=FALSE, fig.width=7, fig.height=4, fig.pos='H', out.width="0.9\\textwidth", fig.align='center',fig.cap='Porównanie błędów średniokwadratowych (MSE) estymatorów S\\textsubscript{0}\\textsuperscript{2} i S\\textsuperscript{2} dla różnych wartości n i \\(\\vartheta\\)'>>=
+example_compare_bernoulli_plot()
+@
+
+\section*{Zadanie 2}
+
+Rozważamy rozkład dwumianowy $\mathcal{B}(n, \theta)$ oraz rodzinę estymatorów:
+\[
+d_{a,b}(x) = \frac{x + a}{n + a + b},
+\]
+gdzie $a,b > 0$. Funkcją straty jest tzw. \textit{entropic loss} (lub log-loss):
+
+$$
+L(\theta, a) = \mathbb{E}_\theta \!\left[
+  \ln \frac{p_\theta(X)}{p_{a}(X)}
+\right],
+$$
+gdzie $p_\theta(X)$ to funkcja masy prawdopodobieństwa rozkładu $\mathrm{Bin}(n, \theta)$.
+Naszym celem jest wyznaczenie wartości funkcji ryzyka:
+$$
+R(\theta, d_{a,b}) = \mathbb{E}_\theta[L(\theta, d_{a,b}(X))].
+$$
+
+\subsection*{Rozwiązanie}
+
+Najpierw rozpiszmy funkcję straty:
+\[
+\begin{aligned}
+L(\theta, a)
+  &= \mathbb{E}_\theta \!\left[
+     \ln \frac{p_\theta(X)}{p_{a,b}(X)}
+  \right] \\[6pt]
+  &= \mathbb{E}_\theta \!\left[
+     \ln
+     \frac{\binom{n}{X} \theta^X (1-\theta)^{n-X}}
+          {\binom{n}{X} a^X (1-a)^{n-X}}
+  \right] \\[6pt]
+  &= \mathbb{E}_\theta \!\left[
+     X \ln \frac{\theta}{a} + (n - X)\ln \frac{1-\theta}{1-a}
+  \right].
+\end{aligned}
+\]
+
+Ponieważ $\mathbb{E}_\theta[X] = n\theta$, otrzymujemy
+\[
+L(\theta, a) = n\theta \ln \frac{\theta}{a}
++ n(1 - \theta)\ln \frac{1 - \theta}{1 - a}.
+\]
+
+Przejdźmy teraz do funkcji ryzyka:
+\[
+\begin{aligned}
+R(\theta, d_{a,b})
+  &= \mathbb{E}_\theta[L(\theta, d_{a,b}(X))] \\[4pt]
+  &= n\theta \, \mathbb{E}_\theta\!\left[
+     \ln \frac{\theta}{d_{a,b}(X)}
+  \right]
+  + n(1 - \theta)\, \mathbb{E}_\theta\!\left[
+     \ln \frac{1 - \theta}{1 - d_{a,b}(X)}
+  \right].
+\end{aligned}
+\]
+
+Podstawiając postać estymatora $d_{a,b}(X) = \frac{X + a}{n + a + b}$, mamy:
+\[
+\begin{aligned}
+R(\theta, d_{a,b})
+  &= n\theta\, \mathbb{E}_\theta\!\left[
+     \ln \frac{\theta (n + a + b)}{X + a}
+  \right]
+  + n(1 - \theta)\, \mathbb{E}_\theta\!\left[
+     \ln \frac{(1 - \theta)(n + a + b)}{n - X + b}
+  \right] \\[6pt]
+  &= n\theta \ln\!\big(\theta (n + a + b)\big)
+     + n(1 - \theta)\ln\!\big((1 - \theta)(n + a + b)\big) \\[4pt]
+  &\quad
+     - n\theta\, \mathbb{E}_\theta[\ln(X + a)]
+     - n(1 - \theta)\, \mathbb{E}_\theta[\ln(n - X + b)].
+\end{aligned}
+\]
+
+Ostatecznie otrzymujemy wzór:
+\[
+\begin{aligned}
+R(\theta, d_{a,b})
+&= n\theta \ln\!\big(\theta (n + a + b)\big)\\
+&+ n(1 - \theta)\ln\!\big((1 - \theta)(n + a + b)\big)\\
+&- n\theta\, \mathbb{E}_\theta[\ln(X + a)]\\
+&- n(1 - \theta)\, \mathbb{E}_\theta[\ln(n - X + b)].
+\end{aligned}
+\]
+Wartości oczekiwane $\mathbb{E}_\theta[\ln(X + a)]$ oraz $\mathbb{E}_\theta[\ln(n - X + b)]$
+można obliczyć numerycznie, korzystając z rozkładu dwumianowego:
+\[
+\mathbb{E}_\theta[f(X)] = \sum_{k=0}^n f(k)\,\mathrm{P}_\theta(X = k)
+= \sum_{k=0}^n f(k)\,\binom{n}{k}\theta^k(1-\theta)^{n-k}.
+\]
+
+
+\subsection*{Kod w~R}
+<<zad2-funkcje, echo=TRUE, results='hide'>>=
+risk_entropy <- function(n, theta, a, b) {
+  x <- 0:n
+  pmf <- dbinom(x, size = n, prob = theta)
+  d_x <- (x + a) / (n + a + b)
+  eps <- .Machine$double.eps
+  theta_clamped <- min(max(theta, eps), 1 - eps)
+  term1 <- theta_clamped * log(theta_clamped / d_x)
+  term2 <- (1 - theta_clamped) * log((1 - theta_clamped) / (1 - d_x))
+  loss_x <- term1 + term2
+  sum(pmf * loss_x)
+}
+
+risk_curve <- function(n, a, b,
+                       thetas = seq(0.001, 0.999, length.out = 301)) {
+  sapply(thetas, function(th) risk_entropy(n, th, a, b))
+}
+@
+<<zad2-funkcje-plot, echo=FALSE, message=FALSE, warning=FALSE, results='hide'>>=
+risk_data_multi <- function(n_values, thetas = seq(0.001, 0.999, length.out = 301)) {
+  df_list <- list()
+
+  for (n in n_values) {
+    r1 <- risk_curve(n, a = 1, b = 1, thetas)
+    r2 <- risk_curve(n, a = n/2, b = n/2, thetas)
+
+    df_list[[length(df_list) + 1]] <- data.frame(
+      n = factor(n),
+      theta = rep(thetas, 2),
+      risk = c(r1, r2),
+      estimator = factor(rep(c("d[1,1]", "d[n/2,n/2]"), each = length(thetas)))
+    )
+  }
+  do.call(rbind, df_list)
+}
+
+plot_risk_multi <- function(n_values = c(5, 10, 20, 50)) {
+  df <- risk_data_multi(n_values)
+
+  ggplot(df, aes(x = theta, y = risk, color = estimator)) +
+    geom_line(linewidth = 1) +
+    facet_wrap(~ n, scales = "free_y") +
+    theme_minimal(base_size = 14) +
+    labs(
+      # title = "Porównanie funkcji ryzyka dla różnych n",
+      x = expression(theta),
+      y = expression(R(theta, d[a,b])),
+      color = "Estymator"
+    ) +
+    scale_color_manual(values = c("#0072B2", "#E69F00"),
+                       labels = c(expression(d[1,1]), expression(d[n/2,n/2]))) +
+    theme(
+      plot.title = element_text(hjust = 0.5, face = "bold"),
+      legend.position = "top",
+      strip.text = element_text(face = "bold")
+    )
+}
+@
+
+\subsection*{Wyniki}
+
+<<zad2-wykres, echo=FALSE, fig.width=6, fig.height=4, out.width="0.8\\textwidth", fig.pos='H', fig.align='center', fig.cap='Porównanie funkcji ryzyka dla różnych wartości n'>>=
+plot_risk_multi(c(5, 10, 20, 50))
+@
+
+Zauważamy, że:
+\begin{itemize}
+  \item Estymator $d_{1,1}$ ma stosunkowo płaską funkcję ryzyka — jest bardziej „równomierny” względem $\vartheta$.
+  \item Estymator $d_{n/2,n/2}$ osiąga mniejsze wartości ryzyka w pobliżu $\vartheta=0{.}5$, lecz większe przy skrajnych wartościach.
+  \item Wybór $a,b$ wpływa na kompromis między minimalizacją ryzyka globalnie a lokalnie w~okolicy konkretnej wartości $\vartheta$.
+\end{itemize}
+
+
+\section*{Zadanie 3}
+
+
+Kontynuując wątek z Zadania 2, zakładamy teraz, że parametr $\vartheta$ ma rozkład a priori
+\[
+\pi(\vartheta) = \mathrm{Beta}(\alpha, \beta),
+\]
+czyli gęstość prawdopodobieństwa
+\[
+h(\vartheta) = \frac{\vartheta^{\alpha - 1} (1-\vartheta)^{\beta - 1}}{B(\alpha, \beta)}, \qquad \vartheta \in [0,1],
+\]
+gdzie $B(\alpha, \beta)$ jest funkcją beta.
+
+Rozważamy rodzinę estymatorów
+\[
+d_{a,b}(x) = \frac{x + a}{n + a + b}, \qquad a,b > 0,
+\]
+dla próby $X \sim \mathcal{B}(n, \vartheta)$.
+
+Celem zadania jest znalezienie optymalnych wartości $(a^*, b^*)$, które minimalizują średnie ryzyko.
+
+
+\subsection*{Rozwiązanie}
+
+Średnie ryzyko można wyznaczyć numerycznie, korzystając z definicji:
+\[
+r(\pi, d_{a,b}) = \int_0^1 R(\vartheta, d_{a,b})\, h(\vartheta)\, d\vartheta,
+\]
+gdzie $R(\vartheta, d_{a,b})$ zostało wyprowadzone w Zadaniu 2.
+
+\subsection*{Kod w~R}
+<<zad3-funkcje, echo=TRUE, results='hide'>>=
+expected_risk_prior <- function(n, a, b,
+                                alpha = 1, beta = 1, rel.tol = 1e-8) {
+  integrand <- function(theta) {
+    sapply(theta, function(th)
+      risk_entropy(n, th, a, b) * dbeta(th, shape1 = alpha, shape2 = beta))
+  }
+  res <- integrate(integrand, lower = 0, upper = 1,
+                   rel.tol = rel.tol, subdivisions = 200L)
+  res$value
+}
+
+optimize_ab_for_prior <- function(n, alpha = 1, beta = 1,
+                                  a_start = 1, b_start = 1,
+                                  lower = 1e-6, upper = 1000) {
+  obj <- function(par) {
+    a <- par[1]; b <- par[2]
+    if (a <= 0 || b <= 0) return(1e10)
+    expected_risk_prior(n, a, b, alpha, beta)
+  }
+  res <- optim(par = c(a_start, b_start), fn = obj, method = "L-BFGS-B",
+               lower = c(lower, lower), upper = c(upper, upper))
+  list(par = res$par, value = res$value,
+       convergence = res$convergence, message = res$message)
+}
+@
+
+<<zad3-plot-funkcje, echo=FALSE, results='hide'>>=
+library(ggplot2)
+
+plot_expected_risk_prior <- function(n, alpha = 1, beta = 1,
+                                     a_seq = seq(0.1, 5, length.out = 40),
+                                     b_seq = seq(0.1, 5, length.out = 40)) {
+  grid <- expand.grid(a = a_seq, b = b_seq)
+  grid$risk <- sapply(1:nrow(grid), function(i)
+    expected_risk_prior(n, grid$a[i], grid$b[i], alpha, beta))
+  opt <- optimize_ab_for_prior(n, alpha, beta)
+
+  ggplot(grid, aes(x = a, y = b, fill = risk)) +
+    geom_tile() +
+    geom_point(aes(x = opt$par[1], y = opt$par[2]),
+               color = "red", size = 3) +
+    scale_fill_viridis_c(option = "plasma") +
+    labs(
+      # title = bquote("Średnie ryzyko " ~ r(pi, d[a,b]) ~
+      #                " dla " ~ n == .(n) ~ ", " ~ alpha == .(alpha) ~ ", " ~ beta == .(beta)),
+      # subtitle = bquote("Czerwony punkt: optimum (" ~ a^"*" ~ "," ~ b^"*" ~ ")"),
+      x = "a", y = "b", fill = "E[risk]"
+    ) +
+    theme_minimal(base_size = 14)
+}
+
+plot_expected_risk_prior_simple <- function(n, alpha = 1, beta = 1,
+                                            a_seq = seq(0.1, 5, length.out = 30),
+                                            b_seq = seq(0.1, 5, length.out = 30)) {
+  grid <- expand.grid(a = a_seq, b = b_seq)
+  grid$risk <- sapply(1:nrow(grid), function(i)
+    expected_risk_prior(n, grid$a[i], grid$b[i], alpha, beta))
+  opt <- optimize_ab_for_prior(n, alpha, beta)
+
+  ggplot(grid, aes(x = a, y = b)) +
+    geom_point(aes(color = risk), size = 2) +
+    geom_point(aes(x = opt$par[1], y = opt$par[2]),
+               color = "red", size = 4) +
+    scale_color_viridis_c(option = "plasma") +
+    labs(
+      # title = bquote("Średnie ryzyko " ~ r(pi, d[a,b]) ~
+      #                " dla " ~ n == .(n) ~ ", " ~ alpha == .(alpha) ~ ", " ~ beta == .(beta)),
+      # subtitle = bquote("Czerwony punkt: optimum (" ~ a^"*" ~ "," ~ b^"*" ~ ")"),
+      x = "a", y = "b", color = "E[risk]"
+    ) +
+    theme_minimal(base_size = 14)
+}
+@
+
+\subsection*{Wyniki}
+<<zad3-wykres, echo=FALSE, fig.width=6.5, fig.height=5, out.width="0.9\\textwidth", fig.pos='H', fig.align='center', fig.cap='Średnie ryzyko $r(\\pi, d_{a,b})$ dla n = 10, α = 1, β = 1. Czerwony punkt: optimum $(a^*, b^*)$.'>>=
+plot_expected_risk_prior(n = 10, alpha = 1, beta = 1)
+@
+
+Dla $\alpha = \beta = 1$ rozkład a priori $\pi$ jest jednostajny na przedziale $[0,1]$.
+W tym przypadku średnie ryzyko Bayesowskie osiąga minimum dla estymatora, który symetrycznie uwzględnia wszystkie możliwe wartości $\vartheta$.
+
+Optymalnym estymatorem Bayesowskim dla entropic loss jest
+\[
+d_{1,1}(X) = \frac{X + 1}{n + 2}.
+\]
+
+Wyniki numeryczne uzyskane z naszego programu potwierdzają tę obserwację. Dla $n=10$ optymalnie dobrane wartości parametrów $(a^*, b^*)$ są bardzo bliskie $1$
+co zgadza się z przewidywaniami teoretycznymi.
+\end{document}
