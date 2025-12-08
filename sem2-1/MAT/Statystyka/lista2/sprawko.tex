@@ -1,0 +1,582 @@
+\documentclass[a4paper,11pt]{article}\usepackage[]{graphicx}\usepackage[]{xcolor}
+% maxwidth is the original width if it is less than linewidth
+% otherwise use linewidth (to make sure the graphics do not exceed the margin)
+\makeatletter
+\def\maxwidth{ %
+  \ifdim\Gin@nat@width>\linewidth
+    \linewidth
+  \else
+    \Gin@nat@width
+  \fi
+}
+\makeatother
+
+\definecolor{fgcolor}{rgb}{0.345, 0.345, 0.345}
+\newcommand{\hlnum}[1]{\textcolor[rgb]{0.686,0.059,0.569}{#1}}%
+\newcommand{\hlsng}[1]{\textcolor[rgb]{0.192,0.494,0.8}{#1}}%
+\newcommand{\hlcom}[1]{\textcolor[rgb]{0.678,0.584,0.686}{\textit{#1}}}%
+\newcommand{\hlopt}[1]{\textcolor[rgb]{0,0,0}{#1}}%
+\newcommand{\hldef}[1]{\textcolor[rgb]{0.345,0.345,0.345}{#1}}%
+\newcommand{\hlkwa}[1]{\textcolor[rgb]{0.161,0.373,0.58}{\textbf{#1}}}%
+\newcommand{\hlkwb}[1]{\textcolor[rgb]{0.69,0.353,0.396}{#1}}%
+\newcommand{\hlkwc}[1]{\textcolor[rgb]{0.333,0.667,0.333}{#1}}%
+\newcommand{\hlkwd}[1]{\textcolor[rgb]{0.737,0.353,0.396}{\textbf{#1}}}%
+\let\hlipl\hlkwb
+
+\usepackage{framed}
+\makeatletter
+\newenvironment{kframe}{%
+ \def\at@end@of@kframe{}%
+ \ifinner\ifhmode%
+  \def\at@end@of@kframe{\end{minipage}}%
+  \begin{minipage}{\columnwidth}%
+ \fi\fi%
+ \def\FrameCommand##1{\hskip\@totalleftmargin \hskip-\fboxsep
+ \colorbox{shadecolor}{##1}\hskip-\fboxsep
+     % There is no \\@totalrightmargin, so:
+     \hskip-\linewidth \hskip-\@totalleftmargin \hskip\columnwidth}%
+ \MakeFramed {\advance\hsize-\width
+   \@totalleftmargin\z@ \linewidth\hsize
+   \@setminipage}}%
+ {\par\unskip\endMakeFramed%
+ \at@end@of@kframe}
+\makeatother
+
+\definecolor{shadecolor}{rgb}{.97, .97, .97}
+\definecolor{messagecolor}{rgb}{0, 0, 0}
+\definecolor{warningcolor}{rgb}{1, 0, 1}
+\definecolor{errorcolor}{rgb}{1, 0, 0}
+\newenvironment{knitrout}{}{} % an empty environment to be redefined in TeX
+
+\usepackage{alltt}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[polish]{babel}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{geometry}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{hyperref}
+\usepackage{color}
+
+\geometry{margin=2.5cm}
+
+\title{Sprawozdanie 2}
+\author{Bartosz Michalak}
+\date{\today}
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\begin{document}
+
+\maketitle
+
+\section{Zadanie 1: Wpływ rozkładu a priori na estymację}
+
+\subsection{Opis problemu}
+Wnioskowanie bayesowskie opiera się na aktualizacji wiedzy a priori (przed doświadczeniem) o dane z próby, tworząc rozkład a posteriori. Rozważamy trzy nieinformujące rozkłady a priori dla parametru $\vartheta \in (0,1)$:
+\begin{enumerate}
+    \item \textbf{Rozkład Laplace'a} (płaski): $\text{Beta}(1, 1)$. Zakłada, że każda wartość parametru jest jednakowo prawdopodobna.
+    \item \textbf{Rozkład Jeffreysa}: $\text{Beta}(1/2, 1/2)$. Jest niezmienniczy ze względu na reparametryzację modelu.
+    \item \textbf{Rozkład MDIP} (Maximum Data Information Prior): Maksymalizuje ilość informacji w danych.
+\end{enumerate}
+Celem jest wyznaczenie wartości oczekiwanej oraz mody rozkładu a posteriori dla zadanych $n$ i $x$.
+
+\subsection{Metodyka obliczeń}
+
+Jeśli rozkład a priori to $\text{Beta}(\alpha, \beta)$, to rozkład a posteriori jest postaci $\text{Beta}(\alpha_n, \beta_n)$, gdzie parametry kształtu aktualizujemy o dane z próby:
+$$ \alpha_n = \alpha + x, \quad \beta_n = \beta + n - x $$
+
+Dla tak określonego rozkładu a posteriori wyznaczamy analitycznie:
+\begin{itemize}
+    \item \textbf{Wartość oczekiwaną:}
+    $$ E[\vartheta|x] = \frac{\alpha_n}{\alpha_n + \beta_n} $$
+    \item \textbf{Modę} (dla $\alpha_n > 1, \beta_n > 1$):
+    $$ \text{Mode} = \frac{\alpha_n - 1}{\alpha_n + \beta_n - 2} $$
+\end{itemize}
+
+Do wyrażenia rozkładu \textbf{MDIP} potrzebujemy znać ujemną entropię rozkładu zmiennej $X$:
+$$ \kappa(\vartheta) = E[\ln(p_\vartheta(X))] $$
+gdzie w tym przypadku $p_\vartheta$ jest funkcją masy zmiennej $X$. Rozkład ten nie ma zwartego wzoru na entropię, ale możemy natomiast zapisać z definicji:
+$$ \kappa(\vartheta) = \sum_{k=0}^n p_\vartheta(k) \ln(p_\vartheta(k)) $$
+gdzie $p_\vartheta(k) = \binom{n}{k}\vartheta^k (1-\vartheta)^{n-k}$. Wartość tę obliczamy numerycznie i przypominamy sobie, że rozkład a priori MDIP ma gęstość $\pi_{MDIP}(\vartheta)$ spełniającą zależność:
+$$ \pi_{MDIP}(\vartheta) \propto \exp(\kappa(\vartheta)) $$
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hldef{bayesian_binomial_post_summary} \hlkwb{<-} \hlkwa{function}\hldef{(}
+  \hlkwc{n}\hldef{,}
+  \hlkwc{x}\hldef{,}
+  \hlkwc{prior} \hldef{=} \hlkwd{c}\hldef{(}\hlsng{"Laplace"}\hldef{,} \hlsng{"Jeffreys"}\hldef{,} \hlsng{"MDIP"}\hldef{)}
+\hldef{) \{}
+
+  \hldef{results} \hlkwb{<-} \hlkwd{data.frame}\hldef{(}
+    \hlkwc{Prior} \hldef{=} \hlkwd{character}\hldef{(),}
+    \hlkwc{Expected_Value} \hldef{=} \hlkwd{numeric}\hldef{(),}
+    \hlkwc{Mode} \hldef{=} \hlkwd{numeric}\hldef{(),}
+    \hlkwc{stringsAsFactors} \hldef{=} \hlnum{FALSE}
+  \hldef{)}
+
+  \hlcom{# (a) Laplace (Beta(1, 1))}
+  \hlkwa{if} \hldef{(}\hlsng{"Laplace"} \hlopt{%in%} \hldef{prior) \{}
+    \hldef{alpha_L} \hlkwb{<-} \hldef{x} \hlopt{+} \hlnum{1}
+    \hldef{beta_L} \hlkwb{<-} \hldef{n} \hlopt{-} \hldef{x} \hlopt{+} \hlnum{1}
+    \hldef{E_L} \hlkwb{<-} \hldef{alpha_L} \hlopt{/} \hldef{(alpha_L} \hlopt{+} \hldef{beta_L)}
+    \hldef{Mode_L} \hlkwb{<-} \hlkwd{ifelse}\hldef{(}
+      \hldef{x} \hlopt{>} \hlnum{0} \hlopt{&&} \hldef{n} \hlopt{-} \hldef{x} \hlopt{>} \hlnum{0}\hldef{, (alpha_L} \hlopt{-} \hlnum{1}\hldef{)} \hlopt{/}
+        \hldef{(alpha_L} \hlopt{+} \hldef{beta_L} \hlopt{-} \hlnum{2}\hldef{),} \hlkwd{ifelse}\hldef{(x} \hlopt{==} \hlnum{0}\hldef{,} \hlnum{0}\hldef{,} \hlnum{1}\hldef{)}
+    \hldef{)}
+    \hldef{results[}\hlkwd{nrow}\hldef{(results)} \hlopt{+} \hlnum{1}\hldef{, ]} \hlkwb{<-} \hlkwd{list}\hldef{(}\hlsng{"Laplace"}\hldef{, E_L, Mode_L)}
+  \hldef{\}}
+
+  \hlcom{# (b) Jeffreys (Beta(1/2, 1/2))}
+  \hlkwa{if} \hldef{(}\hlsng{"Jeffreys"} \hlopt{%in%} \hldef{prior) \{}
+    \hldef{alpha_J} \hlkwb{<-} \hldef{x} \hlopt{+} \hlnum{0.5}
+    \hldef{beta_J} \hlkwb{<-} \hldef{n} \hlopt{-} \hldef{x} \hlopt{+} \hlnum{0.5}
+    \hldef{E_J} \hlkwb{<-} \hldef{alpha_J} \hlopt{/} \hldef{(alpha_J} \hlopt{+} \hldef{beta_J)}
+
+    \hlcom{# Moda (gęstość dąży do nieskończoności na brzegu, gdy x=0 lub x=n)}
+    \hlkwa{if} \hldef{(x} \hlopt{==} \hlnum{0}\hldef{) \{}
+      \hldef{Mode_J} \hlkwb{<-} \hlnum{0}
+    \hldef{\}} \hlkwa{else if} \hldef{(x} \hlopt{==} \hldef{n) \{}
+      \hldef{Mode_J} \hlkwb{<-} \hlnum{1}
+    \hldef{\}} \hlkwa{else} \hldef{\{}
+      \hldef{Mode_J} \hlkwb{<-} \hldef{(alpha_J} \hlopt{-} \hlnum{1}\hldef{)} \hlopt{/} \hldef{(alpha_J} \hlopt{+} \hldef{beta_J} \hlopt{-} \hlnum{2}\hldef{)}
+    \hldef{\}}
+    \hldef{results[}\hlkwd{nrow}\hldef{(results)} \hlopt{+} \hlnum{1}\hldef{, ]} \hlkwb{<-} \hlkwd{list}\hldef{(}\hlsng{"Jeffreys"}\hldef{, E_J, Mode_J)}
+  \hldef{\}}
+
+  \hlcom{# (c) MDIP}
+  \hlkwa{if} \hldef{(}\hlsng{"MDIP"} \hlopt{%in%} \hldef{prior) \{}
+    \hldef{dmdip.binom} \hlkwb{<-} \hlkwa{function}\hldef{(}\hlkwc{n}\hldef{,} \hlkwc{theta}\hldef{) \{}
+      \hldef{pmf} \hlkwb{<-} \hlkwd{outer}\hldef{(}
+        \hlnum{0}\hlopt{:}\hldef{n,}
+        \hldef{theta,}
+        \hlkwd{Vectorize}\hldef{(\textbackslash{}(}\hlkwc{x}\hldef{,} \hlkwc{theta}\hldef{)} \hlkwd{dbinom}\hldef{(x,} \hlkwc{size} \hldef{= n,} \hlkwc{prob} \hldef{= theta))}
+      \hldef{)}
+      \hldef{pmf[pmf} \hlopt{==} \hlnum{0}\hldef{]} \hlkwb{<-} \hlnum{1e-15}
+      \hldef{entropy} \hlkwb{<-} \hlkwd{colSums}\hldef{(pmf} \hlopt{*} \hlkwd{log}\hldef{(pmf),} \hlkwc{na.rm} \hldef{=} \hlnum{TRUE}\hldef{)}
+      \hlkwd{exp}\hldef{(entropy)}
+    \hldef{\}}
+
+    \hldef{E_M} \hlkwb{<-} \hlkwd{integrate}\hldef{(\textbackslash{}(}\hlkwc{theta}\hldef{) theta} \hlopt{*} \hlkwd{dbinom}\hldef{(x, n, theta)} \hlopt{*}
+                       \hlkwd{dmdip.binom}\hldef{(n, theta),} \hlnum{0}\hldef{,} \hlnum{1}\hldef{)}\hlopt{$}\hldef{value} \hlopt{/}
+                       \hlkwd{integrate}\hldef{(\textbackslash{}(}\hlkwc{theta}\hldef{)} \hlkwd{dbinom}\hldef{(x, n, theta)} \hlopt{*}
+                       \hlkwd{dmdip.binom}\hldef{(n, theta),} \hlnum{0}\hldef{,} \hlnum{1}\hldef{)}\hlopt{$}\hldef{value}
+
+    \hldef{Mode_M} \hlkwb{<-} \hlkwd{optimize}\hldef{(}
+      \hldef{\textbackslash{}(}\hlkwc{theta}\hldef{)} \hlkwd{log}\hldef{(}\hlkwd{dbinom}\hldef{(x, n, theta))} \hlopt{+} \hlkwd{log}\hldef{(}\hlkwd{dmdip.binom}\hldef{(n, theta)),}
+      \hlkwc{interval} \hldef{=} \hlkwd{c}\hldef{(}\hlnum{0}\hldef{,} \hlnum{1}\hldef{),}
+      \hlkwc{maximum} \hldef{=} \hlnum{TRUE}
+    \hldef{)}\hlopt{$}\hldef{maximum}
+
+    \hldef{results[}\hlkwd{nrow}\hldef{(results)} \hlopt{+} \hlnum{1}\hldef{, ]} \hlkwb{<-} \hlkwd{list}\hldef{(}\hlsng{"MDIP"}\hldef{, E_M, Mode_M)}
+  \hldef{\}}
+  \hldef{results}\hlopt{$}\hldef{Expected_Value} \hlkwb{<-} \hlkwd{as.numeric}\hldef{(results}\hlopt{$}\hldef{Expected_Value)}
+  \hldef{results}\hlopt{$}\hldef{Mode} \hlkwb{<-} \hlkwd{as.numeric}\hldef{(results}\hlopt{$}\hldef{Mode)}
+
+  \hlkwd{return}\hldef{(results)}
+\hldef{\}}
+\end{alltt}
+\end{kframe}
+\end{knitrout}
+
+Poniżej przedstawiono wyniki estymacji dla małej próby ($n=10, x=4$).
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hldef{n} \hlkwb{<-} \hlnum{10}\hldef{; x} \hlkwb{<-} \hlnum{4}
+\hlkwd{cat}\hldef{(}\hlkwd{sprintf}\hldef{(}\hlsng{"Wyniki dla n = %d i x = %d:\textbackslash{}n"}\hldef{, n, x))}
+\end{alltt}
+\begin{verbatim}
+## Wyniki dla n = 10 i x = 4:
+\end{verbatim}
+\begin{alltt}
+\hlkwd{print}\hldef{(}\hlkwd{bayesian_binomial_post_summary}\hldef{(n, x,} \hlkwc{prior} \hldef{=}
+\hlkwd{c}\hldef{(}\hlsng{"Laplace"}\hldef{,} \hlsng{"Jeffreys"}\hldef{,} \hlsng{"MDIP"}\hldef{)))}
+\end{alltt}
+\begin{verbatim}
+##      Prior Expected_Value      Mode
+## 1  Laplace      0.4166667 0.4000000
+## 2 Jeffreys      0.4090909 0.3888889
+## 3     MDIP      0.4078548 0.3876068
+\end{verbatim}
+\end{kframe}
+\end{knitrout}
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hldef{n} \hlkwb{<-} \hlnum{10}\hldef{; x} \hlkwb{<-} \hlnum{5}
+\hlkwd{cat}\hldef{(}\hlkwd{sprintf}\hldef{(}\hlsng{"Wyniki dla n = %d i x = %d:\textbackslash{}n"}\hldef{, n, x))}
+\end{alltt}
+\begin{verbatim}
+## Wyniki dla n = 10 i x = 5:
+\end{verbatim}
+\begin{alltt}
+\hlkwd{print}\hldef{(}\hlkwd{bayesian_binomial_post_summary}\hldef{(n, x,} \hlkwc{prior} \hldef{=}
+\hlkwd{c}\hldef{(}\hlsng{"Laplace"}\hldef{,} \hlsng{"Jeffreys"}\hldef{,} \hlsng{"MDIP"}\hldef{)))}
+\end{alltt}
+\begin{verbatim}
+##      Prior Expected_Value Mode
+## 1  Laplace            0.5  0.5
+## 2 Jeffreys            0.5  0.5
+## 3     MDIP            0.5  0.5
+\end{verbatim}
+\end{kframe}
+\end{knitrout}
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hldef{n} \hlkwb{<-} \hlnum{10}\hldef{; x} \hlkwb{<-} \hlnum{6}
+\hlkwd{cat}\hldef{(}\hlkwd{sprintf}\hldef{(}\hlsng{"Wyniki dla n = %d i x = %d:\textbackslash{}n"}\hldef{, n, x))}
+\end{alltt}
+\begin{verbatim}
+## Wyniki dla n = 10 i x = 6:
+\end{verbatim}
+\begin{alltt}
+\hlkwd{print}\hldef{(}\hlkwd{bayesian_binomial_post_summary}\hldef{(n, x,} \hlkwc{prior} \hldef{=}
+\hlkwd{c}\hldef{(}\hlsng{"Laplace"}\hldef{,} \hlsng{"Jeffreys"}\hldef{,} \hlsng{"MDIP"}\hldef{)))}
+\end{alltt}
+\begin{verbatim}
+##      Prior Expected_Value      Mode
+## 1  Laplace      0.5833333 0.6000000
+## 2 Jeffreys      0.5909091 0.6111111
+## 3     MDIP      0.5921452 0.6123932
+\end{verbatim}
+\end{kframe}
+\end{knitrout}
+
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hldef{n} \hlkwb{<-} \hlnum{1000}\hldef{; x} \hlkwb{<-} \hlnum{523}
+\hlkwd{cat}\hldef{(}\hlkwd{sprintf}\hldef{(}\hlsng{"Wyniki dla n = %d i x = %d:\textbackslash{}n"}\hldef{, n, x))}
+\end{alltt}
+\begin{verbatim}
+## Wyniki dla n = 1000 i x = 523:
+\end{verbatim}
+\begin{alltt}
+\hlkwd{print}\hldef{(}\hlkwd{bayesian_binomial_post_summary}\hldef{(n, x,} \hlkwc{prior} \hldef{=}
+\hlkwd{c}\hldef{(}\hlsng{"Laplace"}\hldef{,} \hlsng{"Jeffreys"}\hldef{,} \hlsng{"MDIP"}\hldef{)))}
+\end{alltt}
+\begin{verbatim}
+##      Prior Expected_Value      Mode
+## 1  Laplace      0.5229541 0.5230000
+## 2 Jeffreys      0.5229770 0.5230230
+## 3     MDIP      0.5229680 0.5230231
+\end{verbatim}
+\end{kframe}
+\end{knitrout}
+
+\subsection{Wnioski}
+Analizując powyższe wyniki, można zauważyć, że przy małej liczebności próby wybór rozkładu a priori ma zauważalny wpływ na jakość estymacji.
+Różnice między estymatorami wartości oczekiwanej i mody są bardziej widoczne dla $n=10$ niż dla $n=1000$.
+W przypadku większej próby, estymatory z różnych rozkładów a priori zbliżają się do siebie, co jest zgodne z intuicją,
+że przy dużej ilości danych wpływ rozkładu a priori maleje.
+
+Ponadto można zauważyć, że dla $x < \frac{n}{2}$ moda jest mniejsza niż wartość oczekiwana, co wynika z asymetrii rozkładu Beta w tych przypadkach.
+Analogicznie, dla $x > \frac{n}{2}$, moda jest większa niż wartość oczekiwana.
+\section{Zadanie 2: Aproksymacja BCTG}
+
+\subsection{Opis metodyki}
+% Twierdzenie Bernsteina-von Misesa mówi, że przy spełnionych pewnych warunkach, dla dużych prób rozkład a posteriori można aproksymować rozkładem normalnym. W badaniu porównujemy dwie wersje tej aproksymacji:
+% \begin{enumerate}
+%     \item \textbf{BCTG 1 (Momentowa)}: Parametry rozkładu normalnego $N(\mu_n, \sigma_n^2)$ są równe wartości oczekiwanej i wariancji dokładnego rozkładu a posteriori.
+%     \item \textbf{BCTG 2 (Modalna)}: Parametry oparte są na modzie a posteriori oraz krzywiźnie funkcji log-wiarogodności (hesjanie) w punkcie mody.
+% \end{enumerate}
+Twierdzenie Bernsteina-von Misesa (BCTG) pozwala aproksymować rozkład a posteriori rozkładem normalnym dla dużych prób. W badaniu porównujemy dwie wersje tej aproksymacji:
+
+\begin{enumerate}
+    \item \textbf{BCTG 1 (Aproksymacja momentowa):}
+    Rozkład a posteriori przybliżamy rozkładem normalnym $N(\mu_n, \delta_n^2)$, gdzie parametry odpowiadają dokładnej wartości oczekiwanej i wariancji rozkładu a posteriori Beta:
+    $$ \mu_n = \frac{\alpha + x}{\alpha + \beta + n}, \quad \delta_n^2 = \frac{(\alpha + x)(\beta + n - x)}{(\alpha + \beta + n)^2 (\alpha + \beta + n + 1)} $$
+
+    \item \textbf{BCTG 2 (Aproksymacja modalna):}
+    Rozkład a posteriori przybliżamy rozkładem normalnym $N(m_n, v_n^2)$, gdzie $m_n$ jest modą rozkładu a posteriori, a $v_n^2$ jest odwrotnością ujemnej drugiej pochodnej logarytmu gęstości w punkcie mody (związane z informacją Fishera):
+    $$ m_n = \frac{\alpha + x - 1}{\alpha + \beta + n - 2} $$
+    $$ v_n^2 = \frac{(\alpha + x - 1)(\beta + n - x - 1)}{(\alpha + \beta + n - 2)^3} $$
+\end{enumerate}
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hldef{aproksymacja_BCTG} \hlkwb{<-} \hlkwa{function}\hldef{(}\hlkwc{n}\hldef{,} \hlkwc{x}\hldef{,} \hlkwc{alfa}\hldef{,} \hlkwc{beta}\hldef{) \{}
+  \hldef{alfa_n} \hlkwb{<-} \hldef{alfa} \hlopt{+} \hldef{x}
+  \hldef{beta_n} \hlkwb{<-} \hldef{beta} \hlopt{+} \hldef{n} \hlopt{-} \hldef{x}
+
+  \hldef{mu_n_v1} \hlkwb{<-} \hldef{alfa_n} \hlopt{/} \hldef{(alfa_n} \hlopt{+} \hldef{beta_n)}
+  \hldef{delta_n_sq_v1} \hlkwb{<-} \hldef{(alfa_n} \hlopt{*} \hldef{beta_n)} \hlopt{/}
+    \hldef{((alfa_n} \hlopt{+} \hldef{beta_n)}\hlopt{^}\hlnum{2} \hlopt{*} \hldef{(alfa_n} \hlopt{+} \hldef{beta_n} \hlopt{+} \hlnum{1}\hldef{))}
+
+  \hlkwa{if} \hldef{(alfa_n} \hlopt{>} \hlnum{1} \hlopt{&&} \hldef{beta_n} \hlopt{>} \hlnum{1}\hldef{) \{}
+    \hldef{m_n_v2} \hlkwb{<-} \hldef{(alfa_n} \hlopt{-} \hlnum{1}\hldef{)} \hlopt{/} \hldef{(alfa_n} \hlopt{+} \hldef{beta_n} \hlopt{-} \hlnum{2}\hldef{)}
+    \hldef{v_n_sq_v2} \hlkwb{<-} \hldef{((alfa_n} \hlopt{-} \hlnum{1}\hldef{)} \hlopt{*} \hldef{(beta_n} \hlopt{-} \hlnum{1}\hldef{))} \hlopt{/} \hldef{(alfa_n} \hlopt{+} \hldef{beta_n} \hlopt{-} \hlnum{2}\hldef{)}\hlopt{^}\hlnum{3}
+  \hldef{\}} \hlkwa{else} \hldef{\{}
+    \hldef{m_n_v2} \hlkwb{<-} \hlnum{NA}
+    \hldef{v_n_sq_v2} \hlkwb{<-} \hlnum{NA}
+  \hldef{\}}
+
+  \hlkwd{return}\hldef{(}\hlkwd{list}\hldef{(}
+    \hlkwc{mu1} \hldef{= mu_n_v1,}
+    \hlkwc{sd1} \hldef{=} \hlkwd{sqrt}\hldef{(delta_n_sq_v1),}
+    \hlkwc{mu2} \hldef{= m_n_v2,}
+    \hlkwc{sd2} \hldef{=} \hlkwd{sqrt}\hldef{(v_n_sq_v2)}
+  \hldef{))}
+\hldef{\}}
+\end{alltt}
+\end{kframe}
+\end{knitrout}
+% \subsection{Wizualizacja Aproksymacji}
+
+
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{figure}
+\includegraphics[width=\maxwidth]{figure/task2_plot-1} \caption[Porównanie gęstości dokładnej (Beta) z aproksymacjami normalnymi (BCTG) dla różnych wielkości próby]{Porównanie gęstości dokładnej (Beta) z aproksymacjami normalnymi (BCTG) dla różnych wielkości próby.}\label{fig:task2_plot}
+\end{figure}
+
+\end{knitrout}
+
+\subsection{Wizualizacja i Wnioski}
+% \begin{itemize}
+%     \item Dla $n=30$ można zauważyć że wynik jest już zbliżony, ale nadal widoczne są pewne różnice między dokładnym rozkładem Beta a aproksymacjami BCTG. Przede wszystkim, BCTG 1 ma przeszacowaną wartość dla $\vartheta=0.5$ podczas gdy BCTG 2 jest niedoszacowana.
+%     \item Wraz ze wzrostem $n$ (dla $n=50$ i $n=100$), krzywe BCTG zaczynają się idealnie pokrywać z dokładnym rozkładem Beta, co potwierdza działanie twierdzenia granicznego.
+% \end{itemize}
+Na podstawie wygenerowanych wykresów gęstości można sformułować następujące wnioski dotyczące jakości aproksymacji BCTG:
+
+\begin{itemize}
+    \item \textbf{Weryfikacja twierdzenia Bernsteina-von Misesa:}
+    Wykresy wizualnie potwierdzają treść twierdzenia. Dla małej liczebności próby ($n=30$) widoczne są wyraźne rozbieżności między rozkładem dokładnym
+    a aproksymacjami normalnymi. Wraz ze wzrostem liczebności próby (do $n=100$), różnice te zanikają,
+    a wszystkie trzy krzywe zaczynają się coraz bardziej pokrywać. Świadczy to o asymptotycznej zbieżności rozkładu a posteriori do rozkładu normalnego.
+
+    \item \textbf{Porównanie aproksymacji w przypadku asymetrii ($n=30, x=5$):}
+    Dla małej próby i parametru $\vartheta$ bliskiego 0, rozkład a posteriori jest silnie prawoskośny. Widać tu wyraźną różnicę między metodami:
+    \begin{itemize}
+        \item \textbf{BCTG 2:} Ponieważ parametry tej aproksymacji ($m_n, v_n^2$) oparte są na modzie, jej wierzchołek idealnie pokrywa się ze szczytem dokładnego rozkładu Beta (niebieska linia). Jest to metoda preferowana, gdy zależy nam na precyzji wokół estymatora MAP.
+        \item \textbf{BCTG 1:} Ta aproksymacja jest wycentrowana na wartości oczekiwanej ($\mu_n$). W rozkładach prawoskośnych średnia leży na prawo od mody, co na wykresie objawia się przesunięciem czerwonej krzywej względem szczytu rozkładu dokładnego.
+    \end{itemize}
+
+    \item \textbf{Przypadek symetryczny ($n=50, x=25$):}
+    Gdy estymowana frakcja wynosi $0.5$, rozkład a posteriori jest symetryczny. W takim przypadku średnia pokrywa się z modą, w rezultacie czego obie wersje aproksymacji (BCTG 1 i BCTG 2) dają niemal identyczne wyniki i bardzo dobrze przybliżają rozkład dokładny.
+\end{itemize}
+
+\section{Zadanie 3: Testowanie Hipotez i Czynnik Bayesa}
+
+\subsection{Opis metodyki}
+
+Weryfikujemy hipotezę zerową $H_0: \vartheta \le \vartheta_0$ przeciwko hipotezie alternatywnej $H_1: \vartheta > \vartheta_0$.
+
+Do podjęcia decyzji wykorzystujemy \textbf{czynnik Bayesa}. Do oceny siły dowodów na rzecz hipotezy alternatywnej ($H_1$), posługujemy się wskaźnikiem $B_{10}$, zdefiniowanym jako:
+
+$$
+B_{10} = \frac{P(\vartheta \in \Theta_1 | x) \pi_0}{P(\vartheta \in \Theta_0 | x) \pi_1} % = \frac{1}{B_{01}}
+$$
+
+gdzie:
+\begin{itemize}
+    \item $P(\vartheta \in \Theta_1 | x)$ oraz $P(\vartheta \in \Theta_0 | x)$ to prawdopodobieństwa a posteriori odpowiednio dla hipotezy alternatywnej i zerowej.
+    \item $\pi_1$ oraz $\pi_0$ to prawdopodobieństwa a priori tych hipotez.
+\end{itemize}
+
+% Interpretacja: Jeżeli $B_{10} > 1$, dane świadczą na korzyść hipotezy $H_1$.
+
+
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hldef{zadanie_3} \hlkwb{<-} \hlkwa{function}\hldef{(}
+  \hlkwc{n}\hldef{,}
+  \hlkwc{alpha_prior}\hldef{,}
+  \hlkwc{beta_prior}\hldef{,}
+  \hlkwc{x}\hldef{,}
+  \hlkwc{theta0}\hldef{,}
+  \hlkwc{lambda}
+\hldef{) \{}
+  \hldef{alpha_n} \hlkwb{<-} \hldef{alpha_prior} \hlopt{+} \hldef{x}
+  \hldef{beta_n} \hlkwb{<-} \hldef{beta_prior} \hlopt{+} \hldef{n} \hlopt{-} \hldef{x}
+
+  \hlcom{# ============================================================================}
+  \hlcom{# 1. ROZKŁAD DOKŁADNY (Podejście numeryczne)}
+  \hlcom{# ============================================================================}
+  \hlcom{# (a) ESTYMATOR MAP (Maximum A Posteriori)}
+  \hlcom{# Definicja 1: arg max h(theta | x)}
+  \hlcom{# Definiujemy funkcję gęstości i szukamy jej maksimum.}
+  \hldef{funkcja_gestosci_a_posteriori} \hlkwb{<-} \hlkwa{function}\hldef{(}\hlkwc{theta}\hldef{) \{}
+    \hlkwd{dbeta}\hldef{(theta,} \hlkwc{shape1} \hldef{= alpha_n,} \hlkwc{shape2} \hldef{= beta_n)}
+  \hldef{\}}
+
+  \hlcom{# optimize() szuka maksimum w przedziale (0, 1)}
+  \hldef{wynik_optymalizacji} \hlkwb{<-} \hlkwd{optimize}\hldef{(}\hlkwc{f} \hldef{= funkcja_gestosci_a_posteriori,}
+                                  \hlkwc{interval} \hldef{=} \hlkwd{c}\hldef{(}\hlnum{0}\hldef{,} \hlnum{1}\hldef{),}
+                                  \hlkwc{maximum} \hldef{=} \hlnum{TRUE}\hldef{)}
+
+  \hldef{map_exact} \hlkwb{<-} \hldef{wynik_optymalizacji}\hlopt{$}\hldef{maximum}
+
+  \hlcom{# (b) OBSZAR NAJWIĘKSZEJ GĘSTOŚCI (HPD)}
+  \hlcom{# Szukamy przedziału, gdzie gęstość na krańcach}
+  \hlcom{# jest równa (dbeta(L) == dbeta(U))}
+  \hldef{calc_hpd_custom} \hlkwb{<-} \hlkwa{function}\hldef{(}\hlkwc{a}\hldef{,} \hlkwc{b}\hldef{,} \hlkwc{conf_level}\hldef{) \{}
+    \hldef{obj_func} \hlkwb{<-} \hlkwa{function}\hldef{(}\hlkwc{p}\hldef{) \{}
+      \hldef{lower_q} \hlkwb{<-} \hlkwd{qbeta}\hldef{(p, a, b)}
+      \hldef{upper_q} \hlkwb{<-} \hlkwd{qbeta}\hldef{(p} \hlopt{+} \hldef{conf_level, a, b)}
+      \hlkwd{return}\hldef{(}\hlkwd{dbeta}\hldef{(lower_q, a, b)} \hlopt{-} \hlkwd{dbeta}\hldef{(upper_q, a, b))}
+    \hldef{\}}
+    \hlcom{# uniroot szuka p takiego, że różnica gęstości wynosi 0}
+    \hldef{res} \hlkwb{<-} \hlkwd{uniroot}\hldef{(obj_func,} \hlkwc{interval} \hldef{=} \hlkwd{c}\hldef{(}\hlnum{1e-10}\hldef{,} \hlnum{1} \hlopt{-} \hldef{conf_level} \hlopt{-} \hlnum{1e-10}\hldef{))}
+    \hldef{p_best} \hlkwb{<-} \hldef{res}\hlopt{$}\hldef{root}
+    \hlkwd{return}\hldef{(}\hlkwd{c}\hldef{(}\hlkwd{qbeta}\hldef{(p_best, a, b),} \hlkwd{qbeta}\hldef{(p_best} \hlopt{+} \hldef{conf_level, a, b)))}
+  \hldef{\}}
+
+  \hldef{hpd_exact} \hlkwb{<-} \hlkwd{calc_hpd_custom}\hldef{(alpha_n, beta_n,} \hlnum{1} \hlopt{-} \hldef{lambda)}
+
+  \hlcom{# (c) CZYNNIK BAYESA (Bayes Factor)}
+  \hlcom{# Hipoteza H0: theta <= theta0 (Całka z gęstości od 0 do theta0)}
+  \hlcom{# Hipoteza H1: theta > theta0  (Całka z gęstości od theta0 do 1)}
+  \hldef{prob_H0_prior} \hlkwb{<-} \hlkwd{pbeta}\hldef{(theta0, alpha_prior, beta_prior)}
+  \hldef{odds_prior} \hlkwb{<-} \hldef{prob_H0_prior} \hlopt{/} \hldef{(}\hlnum{1} \hlopt{-} \hldef{prob_H0_prior)}
+
+  \hldef{prob_H0_post} \hlkwb{<-} \hlkwd{pbeta}\hldef{(theta0, alpha_n, beta_n)}
+  \hldef{odds_post} \hlkwb{<-} \hldef{prob_H0_post} \hlopt{/} \hldef{(}\hlnum{1} \hlopt{-} \hldef{prob_H0_post)}
+
+  \hldef{bf_exact} \hlkwb{<-} \hldef{odds_prior} \hlopt{/} \hldef{odds_post}
+
+  \hlcom{# ============================================================================}
+  \hlcom{# 2. APROKSYMACJE BCTG 1 (wartość oczekiwana)}
+  \hlcom{# ============================================================================}
+  \hldef{mu_n} \hlkwb{<-} \hldef{alpha_n} \hlopt{/} \hldef{(alpha_n} \hlopt{+} \hldef{beta_n)}
+  \hldef{d_n_sq} \hlkwb{<-} \hldef{(alpha_n} \hlopt{*} \hldef{beta_n)} \hlopt{/} \hldef{((alpha_n} \hlopt{+} \hldef{beta_n)}\hlopt{^}\hlnum{2} \hlopt{*} \hldef{(alpha_n} \hlopt{+} \hldef{beta_n} \hlopt{+} \hlnum{1}\hldef{))}
+  \hldef{sd_n} \hlkwb{<-} \hlkwd{sqrt}\hldef{(d_n_sq)}
+
+  \hldef{map_bctg1} \hlkwb{<-} \hldef{mu_n}
+  \hldef{z_crit} \hlkwb{<-} \hlkwd{qnorm}\hldef{(}\hlnum{1} \hlopt{-} \hldef{lambda} \hlopt{/} \hlnum{2}\hldef{)}
+  \hldef{hpd_bctg1} \hlkwb{<-} \hlkwd{c}\hldef{(mu_n} \hlopt{-} \hldef{z_crit} \hlopt{*} \hldef{sd_n, mu_n} \hlopt{+} \hldef{z_crit} \hlopt{*} \hldef{sd_n)}
+  \hldef{prob_H0_bctg1} \hlkwb{<-} \hlkwd{pnorm}\hldef{(theta0,} \hlkwc{mean} \hldef{= mu_n,} \hlkwc{sd} \hldef{= sd_n)}
+  \hldef{bf_bctg1} \hlkwb{<-} \hldef{odds_prior} \hlopt{/} \hldef{(prob_H0_bctg1} \hlopt{/} \hldef{(}\hlnum{1} \hlopt{-} \hldef{prob_H0_bctg1))}
+
+  \hlcom{# ============================================================================}
+  \hlcom{# 3. APROKSYMACJE BCTG 2 (moda)}
+  \hlcom{# ============================================================================}
+  \hldef{m_n} \hlkwb{<-} \hldef{(alpha_n} \hlopt{-} \hlnum{1}\hldef{)} \hlopt{/} \hldef{(alpha_n} \hlopt{+} \hldef{beta_n} \hlopt{-} \hlnum{2}\hldef{)}
+  \hldef{v_n_sq} \hlkwb{<-} \hldef{((alpha_n} \hlopt{-} \hlnum{1}\hldef{)} \hlopt{*} \hldef{(beta_n} \hlopt{-} \hlnum{1}\hldef{))} \hlopt{/} \hldef{((alpha_n} \hlopt{+} \hldef{beta_n} \hlopt{-} \hlnum{2}\hldef{)}\hlopt{^}\hlnum{3}\hldef{)}
+  \hldef{sd_v} \hlkwb{<-} \hlkwd{sqrt}\hldef{(v_n_sq)}
+  \hldef{map_bctg2} \hlkwb{<-} \hldef{m_n}
+  \hldef{hpd_bctg2} \hlkwb{<-} \hlkwd{c}\hldef{(m_n} \hlopt{-} \hldef{z_crit} \hlopt{*} \hldef{sd_v, m_n} \hlopt{+} \hldef{z_crit} \hlopt{*} \hldef{sd_v)}
+  \hldef{prob_H0_bctg2} \hlkwb{<-} \hlkwd{pnorm}\hldef{(theta0,} \hlkwc{mean} \hldef{= m_n,} \hlkwc{sd} \hldef{= sd_v)}
+  \hldef{bf_bctg2} \hlkwb{<-} \hldef{odds_prior} \hlopt{/} \hldef{(prob_H0_bctg2} \hlopt{/} \hldef{(}\hlnum{1} \hlopt{-} \hldef{prob_H0_bctg2))}
+
+  \hldef{results} \hlkwb{<-} \hlkwd{data.frame}\hldef{(}
+    \hlkwc{Metoda} \hldef{=} \hlkwd{c}\hldef{(}\hlsng{"Dokładna"}\hldef{,} \hlsng{"BCTG 1"}\hldef{,} \hlsng{"BCTG 2"}\hldef{),}
+    \hlkwc{MAP_Estymator} \hldef{=} \hlkwd{c}\hldef{(map_exact, map_bctg1, map_bctg2),}
+    \hlkwc{HPD_Dol} \hldef{=} \hlkwd{c}\hldef{(hpd_exact[}\hlnum{1}\hldef{], hpd_bctg1[}\hlnum{1}\hldef{], hpd_bctg2[}\hlnum{1}\hldef{]),}
+    \hlkwc{HPD_Gora} \hldef{=} \hlkwd{c}\hldef{(hpd_exact[}\hlnum{2}\hldef{], hpd_bctg1[}\hlnum{2}\hldef{], hpd_bctg2[}\hlnum{2}\hldef{]),}
+    \hlkwc{BayesFactor_10} \hldef{=} \hlkwd{c}\hldef{(bf_exact, bf_bctg1, bf_bctg2)}
+  \hldef{)}
+
+  \hlkwd{print}\hldef{(results)}
+  \hlkwd{return}\hldef{(}\hlkwd{invisible}\hldef{(results))}
+\hldef{\}}
+\end{alltt}
+\end{kframe}
+\end{knitrout}
+
+\subsection{Wyniki obliczeń}
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hldef{out} \hlkwb{<-} \hlkwd{rozwiaz_zadanie_3_zgodnie_z_definicja}\hldef{(}
+  \hlkwc{n} \hldef{=} \hlnum{10}\hldef{,} \hlkwc{alpha_prior} \hldef{=} \hlnum{0.5}\hldef{,} \hlkwc{beta_prior} \hldef{=} \hlnum{0.5}\hldef{,}
+  \hlkwc{x} \hldef{=} \hlnum{4}\hldef{,} \hlkwc{theta0} \hldef{=} \hlnum{0.5}\hldef{,} \hlkwc{lambda} \hldef{=} \hlnum{0.05}\hldef{)}
+\end{alltt}
+\begin{verbatim}
+##     Metoda MAP_Estymator    HPD_Dol  HPD_Gora BayesFactor_10
+## 1 Dokładna     0.3888882 0.14257620 0.6838786      0.3602247
+## 2   BCTG 1     0.4090909 0.13090975 0.6872721      0.3530329
+## 3   BCTG 2     0.3888889 0.07039603 0.7073817      0.3281311
+\end{verbatim}
+\end{kframe}
+\end{knitrout}
+
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hldef{out} \hlkwb{<-} \hlkwd{rozwiaz_zadanie_3_zgodnie_z_definicja}\hldef{(}
+  \hlkwc{n} \hldef{=} \hlnum{10}\hldef{,} \hlkwc{alpha_prior} \hldef{=} \hlnum{1}\hldef{,} \hlkwc{beta_prior} \hldef{=} \hlnum{1}\hldef{,}
+  \hlkwc{x} \hldef{=} \hlnum{4}\hldef{,} \hlkwc{theta0} \hldef{=} \hlnum{0.5}\hldef{,} \hlkwc{lambda} \hldef{=} \hlnum{0.05}\hldef{)}
+\end{alltt}
+\begin{verbatim}
+##     Metoda MAP_Estymator    HPD_Dol  HPD_Gora BayesFactor_10
+## 1 Dokładna     0.3999980 0.15857762 0.6817731      0.3781965
+## 2   BCTG 1     0.4166667 0.14867012 0.6846632      0.3719553
+## 3   BCTG 2     0.4000000 0.09636369 0.7036363      0.3500788
+\end{verbatim}
+\end{kframe}
+\end{knitrout}
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hldef{out} \hlkwb{<-} \hlkwd{rozwiaz_zadanie_3_zgodnie_z_definicja}\hldef{(}
+  \hlkwc{n} \hldef{=} \hlnum{10}\hldef{,} \hlkwc{alpha_prior} \hldef{=} \hlnum{0.5}\hldef{,} \hlkwc{beta_prior} \hldef{=} \hlnum{0.5}\hldef{,}
+  \hlkwc{x} \hldef{=} \hlnum{5}\hldef{,} \hlkwc{theta0} \hldef{=} \hlnum{0.5}\hldef{,} \hlkwc{lambda} \hldef{=} \hlnum{0.05}\hldef{)}
+\end{alltt}
+\begin{verbatim}
+##     Metoda MAP_Estymator   HPD_Dol  HPD_Gora BayesFactor_10
+## 1 Dokładna           0.5 0.2235287 0.7764713              1
+## 2   BCTG 1           0.5 0.2171036 0.7828964              1
+## 3   BCTG 2           0.5 0.1733393 0.8266607              1
+\end{verbatim}
+\end{kframe}
+\end{knitrout}
+
+\subsection{Wnioski}
+% Na podstawie powyższej tabeli:
+% \begin{itemize}
+%     \item \textbf{Estymacja punktowa (MAP):} Wartości estymatorów są zbliżone. Dla rozkładu Laplace'a a priori, metoda dokładna i BCTG 2 (modalna) powinny dać ten sam wynik punktowy mody.
+%     \item \textbf{Przedziały HPD:} Aproksymacje normalne generują przedziały symetryczne względem swoich średnich/mód. Dokładny przedział HPD dla rozkładu Beta może być niesymetryczny. Jeśli przedział HPD zawiera wartość $\vartheta_0$, nie mamy podstaw do silnego odrzucenia hipotez.
+%     \item \textbf{Czynnik Bayesa ($B_{10}$):}
+%     \begin{itemize}
+%         \item Jeżeli $B_{10} < 1$: Dane obniżają prawdopodobieństwo hipotezy $H_1$ względem $H_0$. W naszym przykładzie ($x=4, n=10$, czyli $\hat{p}=0.4$) przy testowaniu $H_1: \vartheta > 0.5$, spodziewamy się $B_{10} < 1$, co oznacza wsparcie dla $H_0$.
+%         \item Aproksymacje BCTG zazwyczaj dają zbliżoną wartość czynnika Bayesa, ale mogą być niedokładne przy małych próbach lub gdy $\vartheta_0$ znajduje się na "ogonie" rozkładu.
+%     \end{itemize}
+% \end{itemize}
+
+Analiza wyników uzyskanych dla małej liczebności próby ($n=10$) pozwala na sformułowanie następujących wniosków dotyczących weryfikacji hipotez i jakości aproksymacji:
+
+\begin{enumerate}
+    \item \textbf{Interpretacja Czynnika Bayesa ($B_{10}$) dla $x=4$:}
+    W przypadkach, gdzie liczba sukcesów wynosiła $x=4$ (przy $n=10$), estymator MAP oscylował wokół wartości $0.4$, co jest poniżej progu testowanej hipotezy $H_1: \vartheta > 0.5$.
+    Uzyskane wartości czynnika Bayesa $B_{10}$ wyniosły około $0.33 - 0.38$ (zależnie od przyjętego rozkładu a priori i metody).
+    \begin{itemize}
+        \item Ponieważ $B_{10}$ jest za małe, możemy stwierdzić, że dane nie dostarczają dowodów na rzecz hipotezy alternatywnej ($H_1$).
+        \item Wartość $B_{10} \approx 0.36$ oznacza, że po uwzględnieniu danych, szanse na prawdziwość hipotezy $H_1$ zmalały w stosunku do szans a priori. Innymi słowy, dane około 3-krotnie bardziej wspierają hipotezę zerową ($H_0: \vartheta \le 0.5$) niż alternatywną (gdyż $B_{01} = 1/B_{10} \approx 2.7$).
+    \end{itemize}
+
+    \item \textbf{Przypadek graniczny ($x=5$):}
+    Trzeci wynik przedstawia sytuację, w której liczba sukcesów wynosi dokładnie połowę liczebności próby ($x=5, n=10$).
+    \begin{itemize}
+        \item W tym przypadku estymator MAP wynosi dokładnie $0.5$, a czynnik Bayesa $B_{10} = 1$ dla wszystkich metod.
+        \item Oznacza to, że dane są całkowicie "neutralne" względem testowanych hipotez. Rozkład a posteriori jest symetryczny względem $\vartheta_0 = 0.5$,
+        więc prawdopodobieństwo a posteriori obu hipotez jest jednakowe. Dane nie zmieniły naszych początkowych szans.
+        \item Warto zauważyć, że przedziały największej gęstości a posteriori (HPD) są symetryczne co jest zgodne z intuicją.
+    \end{itemize}
+
+    \item \textbf{Porównanie metod aproksymacji (BCTG vs Dokładna):}
+    Mimo małej liczebności próby ($n=10$), aproksymacje BCTG działają zaskakująco dobrze, choć widać subtelne różnice:
+    \begin{itemize}
+        \item \textbf{Estymacja MAP:} Metoda \textbf{BCTG 2 (Modalna)} zazwyczaj daje wyniki bliższe (lub identyczne) metodzie dokładnej niż BCTG 1. Widać to wyraźnie dla a priori Laplace'a ($x=4$), gdzie BCTG 2 i metoda dokładna dają MAP = $0.400$, podczas gdy BCTG 1 (oparta na średniej) daje $0.417$. Wynika to z faktu, że przy asymetrycznym rozkładzie średnia różni się od mody.
+        \item \textbf{Czynnik Bayesa:} Wszystkie trzy metody prowadzą do tych samych wniosków decyzyjnych ($B_{10} < 1$ dla $x=4$ oraz $B_{10} = 1$ dla $x=5$). Różnice w wartościach liczbowych $B_{10}$ między metodą dokładną a aproksymacjami są na tyle małe, że nie wpływają na interpretację merytoryczną wyniku.
+    \end{itemize}
+
+    \item \textbf{Wpływ rozkładu a priori:}
+    Porównując wyniki dla a priori Jeffreysa ($\alpha=\beta=0.5$) i Laplace'a ($\alpha=\beta=1$) przy $x=4$, różnice są minimalne. Rozkład Laplace'a (płaski) nieznacznie mocniej przesuwa estymatory w stronę centrum ($0.5$), co skutkuje minimalnie wyższym $B_{10}$ ($0.378$ vs $0.360$), ale nie zmienia to ogólnego wniosku o braku podstaw do przyjęcia $H_1$.
+\end{enumerate}
+
+\end{document}

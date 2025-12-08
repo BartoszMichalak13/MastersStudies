@@ -25,3 +25,73 @@ optimize_ab_for_prior <- function(n, alpha = 1, beta = 1, a_start = 1, b_start =
                control = list(trace = 0))
   list(par = res$par, value = res$value, convergence = res$convergence, message = res$message)
 }
+
+
+# Risk function under entropy (Kullback–Leibler) loss for Bernoulli model
+risk_entropy <- function(n, theta, a, b) {
+  # Distribution of number of successes (k) in n Bernoulli trials
+  k_vals <- 0:n
+  probs <- dbinom(k_vals, n, theta)
+
+  # Decision rule: posterior mean of theta under Beta(a,b)
+  d_vals <- (a + k_vals) / (a + b + n)
+
+  # Entropy (KL) loss
+  loss_vals <- theta * log(theta / d_vals) + (1 - theta) * log((1 - theta) / (1 - d_vals))
+
+  # Expected risk over k
+  sum(probs * loss_vals)
+}
+
+library(ggplot2)
+
+# Function to plot expected risk surface for a,b > 0
+plot_expected_risk_prior <- function(n, alpha = 1, beta = 1,
+                                     a_seq = seq(0.1, 5, length.out = 40),
+                                     b_seq = seq(0.1, 5, length.out = 40)) {
+  grid <- expand.grid(a = a_seq, b = b_seq)
+
+  # Compute expected risk for each (a,b)
+  grid$risk <- sapply(1:nrow(grid), function(i) {
+    expected_risk_prior(n, grid$a[i], grid$b[i], alpha, beta)
+  })
+
+  # Find optimal (a,b)
+  opt <- optimize_ab_for_prior(n, alpha, beta)
+
+  ggplot(grid, aes(x = a, y = b, fill = risk)) +
+    geom_tile() +
+    geom_point(aes(x = opt$par[1], y = opt$par[2]),
+               color = "red", size = 3) +
+    scale_fill_viridis_c(option = "plasma") +
+    labs(title = bquote("Expected Bayes risk " ~ r(pi, d[a,b]) ~
+                        " for " ~ n == .(n) ~ ", " ~ alpha == .(alpha) ~ ", " ~ beta == .(beta)),
+         subtitle = bquote("Red point: optimal (" ~ a^"*" ~ "," ~ b^"*" ~ ")"),
+         x = "a", y = "b", fill = "Expected risk") +
+    theme_minimal(base_size = 14)
+}
+
+plot_expected_risk_prior_simple <- function(n, alpha = 1, beta = 1,
+                                            a_seq = seq(0.1, 5, length.out = 30),
+                                            b_seq = seq(0.1, 5, length.out = 30)) {
+  grid <- expand.grid(a = a_seq, b = b_seq)
+
+  # Oblicz ryzyko dla każdej pary (a,b)
+  grid$risk <- sapply(1:nrow(grid), function(i) {
+    expected_risk_prior(n, grid$a[i], grid$b[i], alpha, beta)
+  })
+
+  # Punkt optymalny
+  opt <- optimize_ab_for_prior(n, alpha, beta)
+
+  ggplot(grid, aes(x = a, y = b)) +
+    geom_point(aes(color = risk), size = 2) +
+    geom_point(aes(x = opt$par[1], y = opt$par[2]),
+               color = "red", size = 4) +
+    scale_color_viridis_c(option = "plasma") +
+    labs(title = bquote("Expected Bayes risk " ~ r(pi, d[a,b]) ~
+                        " for " ~ n == .(n) ~ ", " ~ alpha == .(alpha) ~ ", " ~ beta == .(beta)),
+         subtitle = bquote("Red point: optimal (" ~ a^"*" ~ "," ~ b^"*" ~ ")"),
+         x = "a", y = "b", color = "Expected risk") +
+    theme_minimal(base_size = 14)
+}
