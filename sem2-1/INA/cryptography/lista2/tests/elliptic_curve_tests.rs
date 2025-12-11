@@ -98,3 +98,44 @@ fn test_ec_secp256k1_generator() {
         _ => panic!("n * G powinno dać Infinity dla secp256k1"),
     }
 }
+
+#[test]
+fn test_ec_extension_field_odd_characteristic() {
+    println!("--- Test: Curve over F_{{5^2}} (Case E(F_p^k)) ---");
+
+    // 1. Ciało F_{5^2}: p=5, modulus = x^2 + 2 (jest nierozkładalny w F_5)
+    // Sprawdzenie nierozkładalności x^2+2:
+    // 0^2+2=2, 1^2+2=3, 2^2+2=1, 3^2+2=11=1, 4^2+2=18=3. Brak zer.
+    let p = BigInt::from(5);
+    let modulus = vec![BigInt::from(2), BigInt::from(0), BigInt::from(1)]; // 2 + 0x + 1x^2
+    let field = FiniteField::new_extension_field(p, modulus);
+
+    // 2. Krzywa Weierstrassa: y^2 = x^3 + x (a=1, b=0)
+    // Uwaga: Dla p=5 można używać Weierstrassa (p > 3).
+    let a = FieldElement::new(vec![BigInt::from(1)], field.clone());
+    let b = FieldElement::new(vec![BigInt::from(0)], field.clone());
+    let curve = EllipticCurve::new(a, b, field.clone());
+
+    // 3. Punkt na krzywej
+    // Niech x = 2 (stała).
+    // RHS = x^3 + x = 8 + 2 = 10 = 0 mod 5.
+    // LHS = y^2. Szukamy y^2 = 0 -> y = 0.
+    // Punkt P = (2, 0).
+
+    let px = FieldElement::new(vec![BigInt::from(2)], field.clone());
+    let py = FieldElement::new(vec![BigInt::from(0)], field.clone());
+
+    let p_point = curve.point(px, py).expect("Punkt (2,0) powinien być na krzywej");
+
+    // 4. Operacja: Podwajanie
+    // Wzór Weierstrassa: lambda = (3x^2 + a) / 2y.
+    // Tutaj y=0, więc mianownik to 0 -> Dzielenie przez zero.
+    // Zgodnie z teorią, punkt z y=0 na krzywej Weierstrassa ma rząd 2.
+    // 2 * P powinno dać Infinity.
+
+    let p2 = p_point.clone() + p_point.clone();
+    match p2 {
+        ECPoint::Infinity { .. } => {}, // Oczekiwany wynik
+        _ => panic!("Punkt (2,0) ma rząd 2, więc 2P musi być Infinity"),
+    }
+}
