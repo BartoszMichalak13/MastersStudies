@@ -1,8 +1,6 @@
 use num_bigint::BigInt;
 use std::rc::Rc;
 use base64::{Engine as _, engine::general_purpose};
-
-// Importujemy struktury z Twoich pozostałych modułów
 use crate::finite_field::{FiniteField, FieldElement};
 use crate::elliptic_curve::{EllipticCurve, ECPoint};
 

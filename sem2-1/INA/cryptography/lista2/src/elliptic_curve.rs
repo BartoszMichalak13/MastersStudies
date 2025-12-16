@@ -2,8 +2,6 @@ use num_bigint::BigInt;
 use num_traits::{One, Zero};
 use std::rc::Rc;
 use std::ops::{Add, Mul, Neg};
-
-// Importujemy z naszego drugiego modułu
 use crate::finite_field::{FiniteField, FieldElement};
 
 #[derive(Debug, PartialEq)]

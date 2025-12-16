@@ -1,7 +1,6 @@
 use num_bigint::BigInt;
 use std::rc::Rc;
 use lista2::{FiniteField, FieldElement, EllipticCurve, ECPoint, FieldSerde}; 
-// Pamiętaj o imporcie trait 'FieldSerde'!
 
 fn get_secp_field() -> Rc<FiniteField> {
     let p_hex = "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F";
@@ -30,6 +29,12 @@ fn test_field_element_serialization_prime() {
     println!("Hex: {}", s_hex);
     let recovered_hex = FieldElement::from_hex(&s_hex, field.clone());
     assert_eq!(elem.coeffs, recovered_hex.coeffs, "Hex round-trip failed");
+
+
+    // x^0 + x^17 + x^31
+    // let element = FieldElement::new(vec![BigInt::from(1), BigInt::from(0), BigInt::from(0), BigInt::from(0),  BigInt::from(1)], field.clone());
+
+
 
     // 2. Test DECIMAL
     let s_dec = elem.to_decimal();
