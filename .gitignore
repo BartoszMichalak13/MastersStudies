@@ -7,7 +7,6 @@
 *.out
 *.zip
 *.png
-*.csv
 *.o
 *.lock
 *.bin
