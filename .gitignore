@@ -16,4 +16,5 @@
 *.fls
 *.log
 *.synctex(busy)
-
+/INA/cryptography/md5
+/INA/cryptography/hashes
