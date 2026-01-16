@@ -225,7 +225,42 @@ impl FieldElement {
         FieldElement::new(t, self.field.clone())
     }
     
+    // --- Constant-Time Exponentiation (Montgomery Ladder) ---
     pub fn pow(&self, exp: &BigInt) -> Self {
+        // R0 = 1 (akumulator), R1 = a (podstawa)
+        let mut r0 = FieldElement::new(vec![BigInt::one()], self.field.clone());
+        let mut r1 = self.clone();
+
+        let num_bits = exp.bits();
+
+        for i in (0..num_bits).rev() {
+            let bit = exp.bit(i);
+
+            // CSWAP: Jeśli bit 1, zamień role rejestrów
+            if bit {
+                std::mem::swap(&mut r0, &mut r1);
+            }
+
+            // Operacje drabiny:
+            // R1 = R0 * R1 (Mnożenie)
+            // R0 = R0 * R0 (Kwadratowanie)
+
+            let r0_sq = r0.clone() * r0.clone();
+            let prod = r0.clone() * r1.clone();
+
+            r0 = r0_sq;
+            r1 = prod;
+
+            // CSWAP: Odwróć zamianę
+            if bit {
+                std::mem::swap(&mut r0, &mut r1);
+            }
+        }
+        r0
+    }
+
+    // Old Pow Implementation (not used)
+    pub fn old_pow(&self, exp: &BigInt) -> Self {
         let mut res = FieldElement::new(vec![BigInt::one()], self.field.clone());
         let mut base = self.clone();
         let mut e = exp.clone();

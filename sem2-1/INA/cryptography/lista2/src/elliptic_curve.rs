@@ -78,6 +78,13 @@ impl PartialEq for ECPoint {
 }
 
 impl ECPoint {
+    pub fn get_curve(&self) -> Rc<EllipticCurve> {
+        match self {
+            ECPoint::Infinity { curve } => curve.clone(),
+            ECPoint::Point { curve, .. } => curve.clone(),
+        }
+    }
+
     fn check_same_curve(&self, other: &Self) {
         let curve1 = match self {
             ECPoint::Infinity { curve } => curve,
@@ -203,27 +210,72 @@ impl Mul<&BigInt> for ECPoint {
     type Output = Self;
 
     fn mul(self, scalar: &BigInt) -> Self {
-        let curve = match &self {
-            ECPoint::Infinity { curve } => curve.clone(),
-            ECPoint::Point { curve, .. } => curve.clone(),
+        // Obsługa ujemnego skalara
+        let (n, point) = if scalar < &BigInt::zero() {
+            (-scalar, self.neg())
+        } else {
+            (scalar.clone(), self.clone())
         };
 
-        let mut res = ECPoint::Infinity { curve: curve.clone() };
-        let mut temp = self.clone();
-        let mut n = scalar.clone();
+        // R0 = O (Infinity), R1 = P
+        let mut r0 = ECPoint::Infinity { curve: self.get_curve() };
+        let mut r1 = point;
 
-        if n < BigInt::zero() {
-            temp = temp.neg();
-            n = -n;
-        }
+        let num_bits = n.bits();
 
-        while n > BigInt::zero() {
-            if &n % 2 == BigInt::one() {
-                res = res + temp.clone();
+        for i in (0..num_bits).rev() {
+            let bit = n.bit(i);
+
+            // CSWAP (Conditional Swap)
+            if bit {
+                std::mem::swap(&mut r0, &mut r1);
             }
-            temp = temp.clone() + temp.clone();
-            n /= 2;
+            // Poprawny algorytm Montgomery Ladder z CSWAP:
+            // 1. Swap jeśli bit=1.
+            // 2. r1 = r0 + r1
+            // 3. r0 = 2 * r0
+            // 4. Swap jeśli bit=1.
+
+            let sum = r0.clone() + r1.clone();
+            let double = r0.clone() + r0.clone(); // 2 * R0
+
+            r1 = sum;
+            r0 = double;
+
+            if bit {
+                std::mem::swap(&mut r0, &mut r1);
+            }
         }
-        res
+        r0
     }
 }
+
+// // Old implementation without constant-time considerations
+// impl Mul<&BigInt> for ECPoint {
+//     type Output = Self;
+
+//     fn mul(self, scalar: &BigInt) -> Self {
+//         let curve = match &self {
+//             ECPoint::Infinity { curve } => curve.clone(),
+//             ECPoint::Point { curve, .. } => curve.clone(),
+//         };
+
+//         let mut res = ECPoint::Infinity { curve: curve.clone() };
+//         let mut temp = self.clone();
+//         let mut n = scalar.clone();
+
+//         if n < BigInt::zero() {
+//             temp = temp.neg();
+//             n = -n;
+//         }
+
+//         while n > BigInt::zero() {
+//             if &n % 2 == BigInt::one() {
+//                 res = res + temp.clone();
+//             }
+//             temp = temp.clone() + temp.clone();
+//             n /= 2;
+//         }
+//         res
+//     }
+// }
