@@ -1,0 +1,428 @@
+\documentclass[a4paper,11pt]{article}\usepackage[]{graphicx}\usepackage[]{xcolor}
+% maxwidth is the original width if it is less than linewidth
+% otherwise use linewidth (to make sure the graphics do not exceed the margin)
+\makeatletter
+\def\maxwidth{ %
+  \ifdim\Gin@nat@width>\linewidth
+    \linewidth
+  \else
+    \Gin@nat@width
+  \fi
+}
+\makeatother
+
+\definecolor{fgcolor}{rgb}{0.345, 0.345, 0.345}
+\newcommand{\hlnum}[1]{\textcolor[rgb]{0.686,0.059,0.569}{#1}}%
+\newcommand{\hlsng}[1]{\textcolor[rgb]{0.192,0.494,0.8}{#1}}%
+\newcommand{\hlcom}[1]{\textcolor[rgb]{0.678,0.584,0.686}{\textit{#1}}}%
+\newcommand{\hlopt}[1]{\textcolor[rgb]{0,0,0}{#1}}%
+\newcommand{\hldef}[1]{\textcolor[rgb]{0.345,0.345,0.345}{#1}}%
+\newcommand{\hlkwa}[1]{\textcolor[rgb]{0.161,0.373,0.58}{\textbf{#1}}}%
+\newcommand{\hlkwb}[1]{\textcolor[rgb]{0.69,0.353,0.396}{#1}}%
+\newcommand{\hlkwc}[1]{\textcolor[rgb]{0.333,0.667,0.333}{#1}}%
+\newcommand{\hlkwd}[1]{\textcolor[rgb]{0.737,0.353,0.396}{\textbf{#1}}}%
+\let\hlipl\hlkwb
+
+\usepackage{framed}
+\makeatletter
+\newenvironment{kframe}{%
+ \def\at@end@of@kframe{}%
+ \ifinner\ifhmode%
+  \def\at@end@of@kframe{\end{minipage}}%
+  \begin{minipage}{\columnwidth}%
+ \fi\fi%
+ \def\FrameCommand##1{\hskip\@totalleftmargin \hskip-\fboxsep
+ \colorbox{shadecolor}{##1}\hskip-\fboxsep
+     % There is no \\@totalrightmargin, so:
+     \hskip-\linewidth \hskip-\@totalleftmargin \hskip\columnwidth}%
+ \MakeFramed {\advance\hsize-\width
+   \@totalleftmargin\z@ \linewidth\hsize
+   \@setminipage}}%
+ {\par\unskip\endMakeFramed%
+ \at@end@of@kframe}
+\makeatother
+
+\definecolor{shadecolor}{rgb}{.97, .97, .97}
+\definecolor{messagecolor}{rgb}{0, 0, 0}
+\definecolor{warningcolor}{rgb}{1, 0, 1}
+\definecolor{errorcolor}{rgb}{1, 0, 0}
+\newenvironment{knitrout}{}{} % an empty environment to be redefined in TeX
+
+\usepackage{alltt}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{polski}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{geometry}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{booktabs}
+
+\geometry{margin=2.5cm}
+
+\title{Statystyka Matematyczna - Sprawozdanie 3}
+\author{Bartosz Michalak}
+\date{\today}
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\begin{document}
+
+\maketitle
+
+\section*{Wstęp}
+Poniższe sprawozdanie zawiera rozwiązania zadań dotyczących czynnika Bayesa, algorytmu Metropolisa-Hastingsa oraz estymacji przedziałów wiarogodnych najwyższej gęstości (HPD).
+
+% ----------------------------------------------------------------------
+% ZADANIE 1
+% ----------------------------------------------------------------------
+\section{Czynnik Bayesa w modelu dwumianowym}
+
+Rozważamy zmienną losową $X \sim \mathcal{B}(n, \vartheta)$ oraz problem testowania hipotez:
+$$H_0: \vartheta \le \vartheta_0 \quad \text{vs} \quad H_1: \vartheta > \vartheta_0$$
+z rozkładem a priori $\vartheta \sim \mathcal{B}\textit{e}(\alpha, \beta)$.
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlcom{# Funkcja obliczająca B10 i interpretację}
+\hldef{analyze_bayes_factor} \hlkwb{<-} \hlkwa{function}\hldef{(}\hlkwc{x}\hldef{,} \hlkwc{n}\hldef{,} \hlkwc{theta0}\hldef{,} \hlkwc{alpha}\hldef{,} \hlkwc{beta}\hldef{) \{}
+  \hldef{p_h0_prior} \hlkwb{<-} \hlkwd{pbeta}\hldef{(theta0,} \hlkwc{shape1} \hldef{= alpha,} \hlkwc{shape2} \hldef{= beta)}
+  \hldef{p_h1_prior} \hlkwb{<-} \hlnum{1} \hlopt{-} \hldef{p_h0_prior}
+
+  \hldef{alpha_post} \hlkwb{<-} \hldef{alpha} \hlopt{+} \hldef{x}
+  \hldef{beta_post} \hlkwb{<-} \hldef{beta} \hlopt{+} \hldef{n} \hlopt{-} \hldef{x}
+  \hldef{p_h0_post} \hlkwb{<-} \hlkwd{pbeta}\hldef{(theta0,} \hlkwc{shape1} \hldef{= alpha_post,} \hlkwc{shape2} \hldef{= beta_post)}
+  \hldef{p_h1_post} \hlkwb{<-} \hlnum{1} \hlopt{-} \hldef{p_h0_post}
+
+  \hldef{prior_odds} \hlkwb{<-} \hldef{p_h1_prior} \hlopt{/} \hldef{p_h0_prior}
+  \hldef{post_odds} \hlkwb{<-} \hldef{p_h1_post} \hlopt{/} \hldef{p_h0_post}
+
+  \hlcom{# Zabezpieczenie przed dzieleniem przez zero}
+  \hlkwa{if}\hldef{(prior_odds} \hlopt{==} \hlnum{0}\hldef{)} \hlkwd{return}\hldef{(}\hlkwd{list}\hldef{(}\hlkwc{B10} \hldef{=} \hlnum{0}\hldef{,} \hlkwc{Evidence} \hldef{=} \hlsng{"Not worth mention"}\hldef{))}
+
+  \hldef{B10} \hlkwb{<-} \hldef{post_odds} \hlopt{/} \hldef{prior_odds}
+
+  \hldef{evidence} \hlkwb{<-} \hlkwd{ifelse}\hldef{(B10} \hlopt{>} \hlnum{150}\hldef{,} \hlsng{"Very strong"}\hldef{,}
+              \hlkwd{ifelse}\hldef{(B10} \hlopt{>} \hlnum{20}\hldef{,} \hlsng{"Strong"}\hldef{,}
+              \hlkwd{ifelse}\hldef{(B10} \hlopt{>} \hlnum{3}\hldef{,} \hlsng{"Positive"}\hldef{,}
+              \hlsng{"Not worth mention"}\hldef{)))}
+
+  \hlkwd{return}\hldef{(}\hlkwd{list}\hldef{(}\hlkwc{B10} \hldef{= B10,} \hlkwc{Evidence} \hldef{= evidence))}
+\hldef{\}}
+\end{alltt}
+\end{kframe}
+\end{knitrout}
+
+Poniżej przedstawiono wyniki symulacji dla $n=100$, $\vartheta_0 = 1/2$ i $M=1000$ powtórzeń.
+
+\begin{kframe}
+\begin{alltt}
+\hlkwd{set.seed}\hldef{(}\hlnum{123}\hldef{)}
+\hldef{n} \hlkwb{<-} \hlnum{100}
+\hldef{theta0} \hlkwb{<-} \hlnum{0.5}
+\hldef{M} \hlkwb{<-} \hlnum{1000}
+\hldef{thetas} \hlkwb{<-} \hlkwd{c}\hldef{(}\hlnum{0.25}\hldef{,} \hlnum{0.50}\hldef{,} \hlnum{0.75}\hldef{)}
+
+\hlcom{# Lista parametrów a priori (Alpha, Beta)}
+\hldef{priors} \hlkwb{<-} \hlkwd{list}\hldef{(}
+  \hlkwd{c}\hldef{(}\hlnum{1}\hldef{,}\hlnum{1}\hldef{),}
+  \hlkwd{c}\hldef{(}\hlnum{0.5}\hldef{,} \hlnum{0.5}\hldef{),}
+  \hlkwd{c}\hldef{(}\hlnum{2}\hldef{,} \hlnum{5}\hldef{),}
+  \hlkwd{c}\hldef{(}\hlnum{5}\hldef{,} \hlnum{2}\hldef{)}
+\hldef{)}
+
+\hldef{prior_names} \hlkwb{<-} \hlkwd{c}\hldef{(}\hlsng{"Uniform (1, 1)"}\hldef{,} \hlsng{"Jeffreys"}\hldef{,} \hlsng{"Beta(2, 5)"}\hldef{,} \hlsng{"Beta(5, 2)"}\hldef{)}
+
+\hlcom{# Pętla po rozkładach a priori}
+\hlkwa{for} \hldef{(i} \hlkwa{in} \hlnum{1}\hlopt{:}\hlkwd{length}\hldef{(priors)) \{}
+  \hldef{a} \hlkwb{<-} \hldef{priors[[i]][}\hlnum{1}\hldef{]}
+  \hldef{b} \hlkwb{<-} \hldef{priors[[i]][}\hlnum{2}\hldef{]}
+  \hldef{p_name} \hlkwb{<-} \hldef{prior_names[i]}
+
+  \hldef{results_matrix} \hlkwb{<-} \hlkwd{matrix}\hldef{(}\hlnum{0}\hldef{,} \hlkwc{nrow}\hldef{=}\hlnum{3}\hldef{,} \hlkwc{ncol}\hldef{=}\hlnum{3}\hldef{)}
+  \hlkwd{colnames}\hldef{(results_matrix)} \hlkwb{<-} \hlkwd{c}\hldef{(}\hlsng{"Theta = 1/4"}\hldef{,} \hlsng{"Theta = 1/2"}\hldef{,} \hlsng{"Theta = 3/4"}\hldef{)}
+  \hlkwd{rownames}\hldef{(results_matrix)} \hlkwb{<-} \hlkwd{c}\hldef{(}\hlsng{"Positive"}\hldef{,} \hlsng{"Strong"}\hldef{,} \hlsng{"Very Strong"}\hldef{)}
+
+  \hlcom{# Pętla po prawdziwych wartościach theta}
+  \hlkwa{for} \hldef{(j} \hlkwa{in} \hlnum{1}\hlopt{:}\hlkwd{length}\hldef{(thetas)) \{}
+    \hldef{th} \hlkwb{<-} \hldef{thetas[j]}
+    \hldef{X_sim} \hlkwb{<-} \hlkwd{rbinom}\hldef{(M,} \hlkwc{size} \hldef{= n,} \hlkwc{prob} \hldef{= th)}
+
+    \hlcom{# Obliczamy B10 dla całej próby}
+    \hldef{res} \hlkwb{<-} \hlkwd{sapply}\hldef{(}
+      \hldef{X_sim,}
+      \hlkwa{function}\hldef{(}\hlkwc{x}\hldef{)} \hlkwd{analyze_bayes_factor}\hldef{(x, n, theta0, a, b)}\hlopt{$}\hldef{B10}
+    \hldef{)}
+
+    \hldef{results_matrix[}\hlnum{1}\hldef{, j]} \hlkwb{<-} \hlkwd{mean}\hldef{(res} \hlopt{>} \hlnum{3} \hlopt{&} \hldef{res} \hlopt{<=} \hlnum{20}\hldef{)}   \hlcom{# Positive}
+    \hldef{results_matrix[}\hlnum{2}\hldef{, j]} \hlkwb{<-} \hlkwd{mean}\hldef{(res} \hlopt{>} \hlnum{20} \hlopt{&} \hldef{res} \hlopt{<=} \hlnum{150}\hldef{)} \hlcom{# Strong}
+    \hldef{results_matrix[}\hlnum{3}\hldef{, j]} \hlkwb{<-} \hlkwd{mean}\hldef{(res} \hlopt{>} \hlnum{150}\hldef{)}             \hlcom{# Very Strong}
+  \hldef{\}}
+
+  \hlkwd{cat}\hldef{(}\hlsng{"\textbackslash{}\textbackslash{}begin\{table\}[H]\textbackslash{}n"}\hldef{)}
+  \hlkwd{cat}\hldef{(}\hlsng{"\textbackslash{}\textbackslash{}centering\textbackslash{}n"}\hldef{)}
+
+  \hlkwd{cat}\hldef{(}\hlkwd{paste0}\hldef{(}
+    \hlsng{"\textbackslash{}\textbackslash{}caption\{Oszacowane prawdopodobieństwa dla rozkładu a priori: "}\hldef{,}
+    \hldef{p_name,}
+    \hlsng{"\}\textbackslash{}n"}\hldef{)}
+  \hldef{)}
+
+  \hlkwd{print}\hldef{(knitr}\hlopt{::}\hlkwd{kable}\hldef{(}
+    \hldef{results_matrix,}
+    \hlkwc{digits} \hldef{=} \hlnum{3}\hldef{,}
+    \hlkwc{format} \hldef{=} \hlsng{"latex"}\hldef{,}
+    \hlkwc{booktabs} \hldef{=} \hlnum{TRUE}\hldef{)}
+  \hldef{)}
+
+  \hlkwd{cat}\hldef{(}\hlsng{"\textbackslash{}\textbackslash{}end\{table\}\textbackslash{}n"}\hldef{)}
+  \hlkwd{cat}\hldef{(}\hlsng{"\textbackslash{}n"}\hldef{)}
+\hldef{\}}
+\end{alltt}
+\end{kframe}\begin{table}[H]
+\centering
+\caption{Oszacowane prawdopodobieństwa dla rozkładu a priori: Uniform (1, 1)}
+
+\begin{tabular}{lrrr}
+\toprule
+  & Theta = 1/4 & Theta = 1/2 & Theta = 3/4\\
+\midrule
+Positive & 0 & 0.209 & 0.001\\
+Strong & 0 & 0.037 & 0.002\\
+Very Strong & 0 & 0.003 & 0.997\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Oszacowane prawdopodobieństwa dla rozkładu a priori: Jeffreys}
+
+\begin{tabular}{lrrr}
+\toprule
+  & Theta = 1/4 & Theta = 1/2 & Theta = 3/4\\
+\midrule
+Positive & 0 & 0.191 & 0.000\\
+Strong & 0 & 0.033 & 0.005\\
+Very Strong & 0 & 0.004 & 0.995\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Oszacowane prawdopodobieństwa dla rozkładu a priori: Beta(2, 5)}
+
+\begin{tabular}{lrrr}
+\toprule
+  & Theta = 1/4 & Theta = 1/2 & Theta = 3/4\\
+\midrule
+Positive & 0 & 0.434 & 0\\
+Strong & 0 & 0.161 & 0\\
+Very Strong & 0 & 0.022 & 1\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Oszacowane prawdopodobieństwa dla rozkładu a priori: Beta(5, 2)}
+
+\begin{tabular}{lrrr}
+\toprule
+  & Theta = 1/4 & Theta = 1/2 & Theta = 3/4\\
+\midrule
+Positive & 0 & 0.049 & 0.001\\
+Strong & 0 & 0.008 & 0.011\\
+Very Strong & 0 & 0.000 & 0.988\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+
+
+\textbf{Wnioski:}
+Tabele przedstawiają prawdopodobieństwo uzyskania określonej siły dowodu przeciwko $H_0$.
+Dla $\vartheta = 1/4$ (gdy $H_0$ jest prawdziwa) wiersze "Strong" i "Very Strong" zawierają wartości bliskie 0, co jest pożądane (brak błędu I rodzaju).
+Dla $\vartheta = 3/4$ (gdy $H_1$ jest prawdziwa) dominuje kategoria "Very Strong", co świadczy o wysokiej mocy testu.
+
+% ----------------------------------------------------------------------
+% ZADANIE 2
+% ----------------------------------------------------------------------
+\section{Algorytm Metropolisa-Hastingsa dla rozkładu Weibulla}
+
+W tym zadaniu generujemy próbę $X_1, \dots, X_n$ z rozkładu Weibulla $\mathcal{W}(\vartheta, 1)$ z gęstością:
+$$ p_\vartheta(x) = \vartheta x^{\vartheta-1} \exp(-x^\vartheta) \textbf{1}_{(0, \infty)}(x) $$
+Przyjmujemy rozkład a priori $\vartheta \sim \mathcal{U}(0, 1)$.
+
+Algorytm Metropolisa-Hastingsa (Random Walk) posłuży do estymacji $E[\vartheta|x]$ oraz $Median(\vartheta|x)$.
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlkwd{set.seed}\hldef{(}\hlnum{4321}\hldef{)}
+
+\hlcom{# Dwie wartości prawdziwego parametru theta}
+\hldef{thetas_to_test} \hlkwb{<-} \hlkwd{c}\hldef{(}\hlnum{0.4}\hldef{,} \hlnum{0.8}\hldef{)}
+\hldef{n} \hlkwb{<-} \hlnum{100}
+
+\hldef{log_posteriori_weibull} \hlkwb{<-} \hlkwa{function}\hldef{(}\hlkwc{theta}\hldef{,} \hlkwc{x}\hldef{) \{}
+  \hlkwa{if} \hldef{(theta} \hlopt{<=} \hlnum{0} \hlopt{||} \hldef{theta} \hlopt{>=} \hlnum{1}\hldef{)} \hlkwd{return}\hldef{(}\hlopt{-}\hlnum{Inf}\hldef{)}
+  \hldef{n} \hlkwb{<-} \hlkwd{length}\hldef{(x)}
+  \hldef{val} \hlkwb{<-} \hldef{n} \hlopt{*} \hlkwd{log}\hldef{(theta)} \hlopt{+} \hldef{(theta} \hlopt{-} \hlnum{1}\hldef{)} \hlopt{*} \hlkwd{sum}\hldef{(}\hlkwd{log}\hldef{(x))} \hlopt{-} \hlkwd{sum}\hldef{(x}\hlopt{^}\hldef{theta)}
+  \hlkwd{return}\hldef{(val)}
+\hldef{\}}
+
+\hldef{run_mh} \hlkwb{<-} \hlkwa{function}\hldef{(}\hlkwc{iter}\hldef{,} \hlkwc{x_data}\hldef{,} \hlkwc{start_val}\hldef{=}\hlnum{0.5}\hldef{,} \hlkwc{sd_prop}\hldef{=}\hlnum{0.05}\hldef{) \{}
+  \hldef{chain} \hlkwb{<-} \hlkwd{numeric}\hldef{(iter)}
+  \hldef{chain[}\hlnum{1}\hldef{]} \hlkwb{<-} \hldef{start_val}
+  \hlkwa{for}\hldef{(i} \hlkwa{in} \hlnum{2}\hlopt{:}\hldef{iter) \{}
+    \hldef{curr} \hlkwb{<-} \hldef{chain[i}\hlopt{-}\hlnum{1}\hldef{]}
+    \hldef{prop} \hlkwb{<-} \hlkwd{rnorm}\hldef{(}\hlnum{1}\hldef{, curr, sd_prop)}
+    \hldef{log_alpha} \hlkwb{<-} \hlkwd{log_posteriori_weibull}\hldef{(prop, x_data)} \hlopt{-}
+                 \hlkwd{log_posteriori_weibull}\hldef{(curr, x_data)}
+    \hlkwa{if} \hldef{(}\hlkwd{log}\hldef{(}\hlkwd{runif}\hldef{(}\hlnum{1}\hldef{))} \hlopt{<} \hldef{log_alpha) chain[i]} \hlkwb{<-} \hldef{prop} \hlkwa{else} \hldef{chain[i]} \hlkwb{<-} \hldef{curr}
+  \hldef{\}}
+  \hlkwd{return}\hldef{(chain)}
+\hldef{\}}
+
+\hlcom{# Miejsce na wyniki}
+\hldef{estimates} \hlkwb{<-} \hlkwd{data.frame}\hldef{()}
+\hldef{chains_for_plots} \hlkwb{<-} \hlkwd{list}\hldef{()}
+\hldef{longest_chain_task3} \hlkwb{<-} \hlkwa{NULL} \hlcom{# Zmienna dla Zadania 3}
+
+\hlcom{# Pętla po dwóch wartościach Theta (0.4 i 0.8)}
+\hlkwa{for} \hldef{(th_true} \hlkwa{in} \hldef{thetas_to_test) \{}
+
+  \hlcom{# Generujemy dane dla aktualnego theta}
+  \hldef{X_weibull} \hlkwb{<-} \hlkwd{rweibull}\hldef{(n,} \hlkwc{shape} \hldef{= th_true,} \hlkwc{scale} \hldef{=} \hlnum{1}\hldef{)}
+
+  \hldef{lengths} \hlkwb{<-} \hlkwd{c}\hldef{(}\hlnum{1000}\hldef{,} \hlnum{10000}\hldef{,} \hlnum{100000}\hldef{)}
+
+  \hlkwa{for} \hldef{(L} \hlkwa{in} \hldef{lengths) \{}
+    \hlcom{# Uruchomienie algorytmu}
+    \hldef{ch} \hlkwb{<-} \hlkwd{run_mh}\hldef{(L, X_weibull)}
+
+    \hlcom{# Zapisujemy łańcuchy do wykresów (tylko 1k i 10k)}
+    \hlkwa{if} \hldef{(L} \hlopt{%in%} \hlkwd{c}\hldef{(}\hlnum{1000}\hldef{,} \hlnum{10000}\hldef{)) \{}
+      \hldef{chains_for_plots[[}\hlkwd{paste}\hldef{(th_true, L,} \hlkwc{sep}\hldef{=}\hlsng{"_"}\hldef{)]]} \hlkwb{<-} \hldef{ch}
+    \hldef{\}}
+
+    \hlcom{# Zapamiętujemy najdłuższy łańcuch dla pierwszego przypadku (theta=0.4)}
+    \hlcom{# do Zadania 3}
+    \hlkwa{if} \hldef{(L} \hlopt{==} \hlnum{100000} \hlopt{&&} \hldef{th_true} \hlopt{==} \hldef{thetas_to_test[}\hlnum{1}\hldef{]) \{}
+      \hldef{longest_chain_task3} \hlkwb{<-} \hldef{ch}
+    \hldef{\}}
+
+    \hlcom{# Statystyki do tabeli}
+    \hldef{burn_in} \hlkwb{<-} \hlkwd{floor}\hldef{(L} \hlopt{*} \hlnum{0.1}\hldef{)}
+    \hldef{ch_clean} \hlkwb{<-} \hldef{ch[}\hlopt{-}\hldef{(}\hlnum{1}\hlopt{:}\hldef{burn_in)]}
+
+    \hldef{estimates} \hlkwb{<-} \hlkwd{rbind}\hldef{(estimates,} \hlkwd{data.frame}\hldef{(}
+      \hlkwc{Prawdziwa_Theta} \hldef{= th_true,}
+      \hlkwc{Dlugosc_Lancucha} \hldef{= L,}
+      \hlkwc{Est_Srednia} \hldef{=} \hlkwd{mean}\hldef{(ch_clean),}
+      \hlkwc{Est_Mediana} \hldef{=} \hlkwd{median}\hldef{(ch_clean)}
+    \hldef{))}
+  \hldef{\}}
+\hldef{\}}
+\end{alltt}
+\end{kframe}
+\end{knitrout}
+
+\begin{table}[H]
+\centering
+\caption{Estymacja parametru $\vartheta$ metodą MCMC dla dwóch przypadków}
+
+\begin{tabular}{r|r|r|r}
+\hline
+Prawdziwa\_Theta & Dlugosc\_Lancucha & Est\_Srednia & Est\_Mediana\\
+\hline
+0.4 & 1e+03 & 0.4546 & 0.4535\\
+\hline
+0.4 & 1e+04 & 0.4491 & 0.4487\\
+\hline
+0.4 & 1e+05 & 0.4490 & 0.4486\\
+\hline
+0.8 & 1e+03 & 0.7489 & 0.7473\\
+\hline
+0.8 & 1e+04 & 0.7451 & 0.7439\\
+\hline
+0.8 & 1e+05 & 0.7437 & 0.7429\\
+\hline
+\end{tabular}
+
+
+\end{table}
+
+Poniżej przedstawiono przebiegi łańcuchów (Trace plots) dla obu badanych parametrów $\vartheta$ oraz długości $N=1000$ i $N=10000$.
+
+\begin{figure}[H]
+\centering
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}
+\includegraphics[width=\maxwidth]{figure/zadanie2_wykresy-1} 
+\end{knitrout}
+\caption{Przebieg łańcuchów Markowa (Trace plots) dla $\vartheta=0.4$ (góra) i $\vartheta=0.8$ (dół).}
+\end{figure}
+
+\textbf{Wnioski:}
+Analiza wykresów śladowych (trace plots) wskazuje na poprawną zbieżność algorytmu Metropolisa-Hastingsa. Łańcuchy dla obu wartości ϑ (0.4 oraz 0.8) szybko osiągają stacjonarność.
+Obserwowane przesunięcie średniej wartości łańcucha (niebieski wykres) względem prawdziwej wartości parametru (czerwona linia) jest zjawiskiem naturalnym i wynika z losowości generowania próby danych ($n=100$).
+
+% ----------------------------------------------------------------------
+% ZADANIE 3
+% ----------------------------------------------------------------------
+\section{Przedział wiarogodny najwyższej gęstości (HPD)}
+
+Wyznaczamy $95\%$ przedział HPD dla parametru $\vartheta$ z Zadania 2. Do analizy wybrano przypadek, gdzie prawdziwe $\vartheta = 0.4$ (najdłuższy wygenerowany łańcuch).
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hldef{calc_HPD} \hlkwb{<-} \hlkwa{function}\hldef{(}\hlkwc{chain}\hldef{,} \hlkwc{alpha}\hldef{=}\hlnum{0.05}\hldef{) \{}
+  \hldef{M} \hlkwb{<-} \hlkwd{length}\hldef{(chain)}
+  \hldef{burn_in} \hlkwb{<-} \hlkwd{floor}\hldef{(M}\hlopt{/}\hlnum{10}\hldef{)}
+  \hldef{chain_clean} \hlkwb{<-} \hlkwd{sort}\hldef{(chain[}\hlopt{-}\hldef{(}\hlnum{1}\hlopt{:}\hldef{burn_in)])}
+  \hldef{Mu} \hlkwb{<-} \hlkwd{length}\hldef{(chain_clean)}
+
+  \hldef{k} \hlkwb{<-} \hlkwd{floor}\hldef{((}\hlnum{1} \hlopt{-} \hldef{alpha)} \hlopt{*} \hldef{Mu)}
+  \hldef{idx_start} \hlkwb{<-} \hlnum{1}\hlopt{:}\hldef{(Mu} \hlopt{-} \hldef{k)}
+  \hldef{idx_end} \hlkwb{<-} \hldef{idx_start} \hlopt{+} \hldef{k}
+
+  \hldef{diffs} \hlkwb{<-} \hldef{chain_clean[idx_end]} \hlopt{-} \hldef{chain_clean[idx_start]}
+  \hldef{best_idx} \hlkwb{<-} \hlkwd{which.min}\hldef{(diffs)}
+
+  \hldef{lower} \hlkwb{<-} \hldef{chain_clean[best_idx]}
+  \hldef{upper} \hlkwb{<-} \hldef{chain_clean[best_idx} \hlopt{+} \hldef{k]}
+
+  \hlkwd{return}\hldef{(}\hlkwd{c}\hldef{(}\hlkwc{Lower}\hldef{=lower,} \hlkwc{Upper}\hldef{=upper,} \hlkwc{Length}\hldef{=diffs[best_idx]))}
+\hldef{\}}
+
+\hlcom{# Używamy zapamiętanego łańcucha z Zadania 2 (dla theta = 0.4)}
+\hldef{hpd_res} \hlkwb{<-} \hlkwd{calc_HPD}\hldef{(longest_chain_task3,} \hlkwc{alpha}\hldef{=}\hlnum{0.05}\hldef{)}
+
+\hlcom{# Dane do wykresu}
+\hldef{burn_in_plot} \hlkwb{<-} \hlkwd{floor}\hldef{(}\hlkwd{length}\hldef{(longest_chain_task3)} \hlopt{*} \hlnum{0.1}\hldef{)}
+\hldef{chain_for_hist} \hlkwb{<-} \hldef{longest_chain_task3[}\hlopt{-}\hldef{(}\hlnum{1}\hlopt{:}\hldef{burn_in_plot)]}
+\end{alltt}
+\end{kframe}
+\end{knitrout}
+
+Otrzymany $95\%$ przedział HPD: $[0.3835, 0.5191]$.
+
+\begin{figure}[H]
+\centering
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}
+\includegraphics[width=\maxwidth]{figure/zadanie3_wykres-1} 
+\end{knitrout}
+\caption{Rozkład a posteriori dla $\vartheta = 0.4$ z zaznaczonym przedziałem HPD.}
+\end{figure}
+\textbf{Wnioski:}
+Można zauważyć, że maksimum funkcji gęstości a posteriori (moda) jest nieco przesunięte względem prawdziwej wartości parametru (0.4).
+Jest to bezpośrednia konsekwencja zjawiska opisanego w zadaniu drugim, algorytm wyznaczył rozkład a posteriori na podstawie konkretnej,
+wylosowanej 100-elementowej próby, która mogła losowo faworyzować nieco wyższe wartości parametru. Mimo to, przedział HPD zawiera prawdziwą wartość.
+
+
+\end{document}

@@ -119,12 +119,12 @@ impl ECPoint {
         if s == "INFINITY" {
             return curve.infinity();
         }
-        
+
         let parts: Vec<&str> = s.split(':').collect();
         if parts.len() != 2 {
             panic!("Invalid point format");
         }
-        
+
         let field = curve.field.clone();
         let x = match format {
             "dec" => FieldElement::from_decimal(parts[0], field.clone()),
