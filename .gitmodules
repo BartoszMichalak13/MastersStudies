@@ -1,0 +1,6 @@
+[submodule "mstrCode/mainExp/ripser"]
+	path = mstrCode/mainExp/ripser
+	url = https://github.com/Ripser/ripser
+[submodule "sem3-2/ComputerSymulationsOfStochasticProceses/raports/Raports-CSoSP"]
+	path = sem3-2/ComputerSymulationsOfStochasticProceses/raports/Raports-CSoSP
+	url = https://github.com/BartoszMichalak13/Raports-CSoSP
