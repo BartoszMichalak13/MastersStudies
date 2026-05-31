@@ -4,9 +4,18 @@
 *bin/
 *target/
 
+/__pycache__/
+*.pyc
+
+
 *.out
 *.zip
+
+
 *.png
+.jpg
+.jpeg
+
 *.o
 *.lock
 *.bin
