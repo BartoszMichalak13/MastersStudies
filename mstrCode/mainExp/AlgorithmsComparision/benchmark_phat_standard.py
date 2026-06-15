@@ -83,14 +83,12 @@ if __name__ == "__main__":
         with open("torus.csv", "w") as f:
             subprocess.run(["./torus", str(N), "3"], stdout=f)
 
-        # Generujemy potrzebne struktury BEZ monitorowania pamięci
         st = generate_gudhi_tree("torus.csv", max_dim, max_eps)
         columns = translate_to_phat_columns_fast(st)
 
         gc.collect()
         time.sleep(0.1)
 
-        # Monitorujemy od momentu wrzucenia kolumn do C++ do końca liczenia
         with MemoryMonitor() as monitor:
             start_time = time.time()
             boundary_matrix_std = phat.boundary_matrix(columns=columns)

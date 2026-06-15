@@ -88,12 +88,10 @@ if __name__ == "__main__":
         gc.collect()
         time.sleep(0.1)
 
-        # Ripser
         t_rips, m_rips = measure_cpp_ripser("torus.csv", max_dim, max_eps)
         times['ripser'].append(t_rips)
         memory['ripser'].append(m_rips)
 
-        # GUDHI Native
         st = generate_gudhi_tree("torus.csv", max_dim, max_eps)
         gc.collect()
         time.sleep(0.1)
@@ -112,6 +110,5 @@ if __name__ == "__main__":
         print(f"Ripser (C++):    {t_rips:.4f} s | Peak: {m_rips:.2f} MB")
         print(f"GUDHI Natywnie:  {t_gudhi:.4f} s | Overhead: {m_gudhi:.2f} MB\n")
 
-    # Zapis wyników do pliku
     with open('results_cohom.json', 'w') as f:
         json.dump({'point_counts': point_counts, 'times': times, 'memory': memory}, f)

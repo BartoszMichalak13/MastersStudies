@@ -5,7 +5,6 @@ import matplotlib.pyplot as plt
 def main():
     print("Loading benchmark results...")
     
-    # Wczytywanie wyników z 3 plików
     with open('results_cohom.json', 'r') as f:
         cohom_data = json.load(f)
         
@@ -17,14 +16,11 @@ def main():
 
     point_counts = cohom_data['point_counts']
     
-    # Łączenie słowników wyników
     times = {**cohom_data['times'], **phat_gen_data['times'], **phat_std_data['times']}
     memory = {**cohom_data['memory'], **phat_gen_data['memory'], **phat_std_data['memory']}
 
-    print("Generating plots...")
     os.makedirs("plots", exist_ok=True)
 
-    # --- Wykres czasu z tłumaczeniem ---
     plt.figure(figsize=(10, 6))
     plt.plot(point_counts, times['ripser'], marker='o', label='Ripser (Native)', color='green')
     plt.plot(point_counts, times['gudhi_native'], marker='D', label='GUDHI Native (Cohomology)', color='purple')
@@ -38,7 +34,6 @@ def main():
     plt.savefig("plots/SPLIT_benchmark_time.png", dpi=300)
     plt.close()
 
-    # --- Wykres czasu bez tłumaczenia ---
     plt.figure(figsize=(10, 6))
     plt.plot(point_counts, times['ripser'], marker='o', label='Ripser (Native)', color='green')
     plt.plot(point_counts, times['gudhi_native'], marker='D', label='GUDHI Native (Cohomology)', color='purple')
@@ -51,7 +46,6 @@ def main():
     plt.savefig("plots/SPLIT_benchmark_time_no_translation.png", dpi=300)
     plt.close()
 
-    # --- Wykres pamięci z tłumaczeniem ---
     plt.figure(figsize=(10, 6))
     plt.plot(point_counts, memory['ripser'], marker='o', label='Ripser Peak Memory', color='green')
     plt.plot(point_counts, memory['gudhi_native'], marker='D', label='GUDHI Native Overhead', color='purple')
@@ -65,7 +59,6 @@ def main():
     plt.savefig("plots/SPLIT_benchmark_memory.png", dpi=300)
     plt.close()
 
-    # --- Wykres pamięci bez tłumaczenia ---
     plt.figure(figsize=(10, 6))
     plt.plot(point_counts, memory['ripser'], marker='o', label='Ripser Peak Memory', color='green')
     plt.plot(point_counts, memory['gudhi_native'], marker='D', label='GUDHI Native Overhead', color='purple')
@@ -77,8 +70,6 @@ def main():
     plt.grid(True, which="both", ls="--")
     plt.savefig("plots/SPLIT_benchmark_memory_no_translation.png", dpi=300)
     plt.close()
-
-    print("Done! Check your plots directory.")
 
 if __name__ == "__main__":
     main()

@@ -10,7 +10,6 @@ PYTHON_PATH="/home/bamichal/miniforge3/envs/tda_stable/bin/python"
 CPP_SOURCE_PATH="../RipsersComparisionAndTorus/torusGen.cpp"
 
 echo -e "${BLUE}=== Starting Automated TDA Benchmarks ===${NC}"
-
 if [ ! -f "$CPP_SOURCE_PATH" ]; then
     echo -e "${RED}Error: torus.cpp not found at $CPP_SOURCE_PATH.${NC}"
     exit 1

@@ -86,7 +86,6 @@ if __name__ == "__main__":
         gc.collect()
         time.sleep(0.1)
 
-        # Monitorujemy tylko samo tłumaczenie kolumn
         with MemoryMonitor() as monitor:
             start_time = time.time()
             columns = translate_to_phat_columns_fast(st)

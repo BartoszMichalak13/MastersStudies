@@ -13,8 +13,8 @@
 
 
 *.png
-.jpg
-.jpeg
+*.jpg
+*.jpeg
 
 *.o
 *.lock
@@ -25,3 +25,4 @@
 *.log
 *.synctex(busy)
 *.csv
+*.npy
