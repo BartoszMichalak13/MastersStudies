@@ -1,0 +1,9 @@
+From: Dmitriy Morozov <morozov@cs.duke.edu>
+Date: Thu, 10 Jan 2008 04:36:03 -0500
+State: resolved
+Subject: Remove maintenance of "lazy decomposition"
+Message-Id: <8a14b4849071f910-0-artemis@metatron>
+resolution: fixed
+
+The maintenance of "lazy decomposition" (added in [a0736dd3c671]) is
+incorrect (due to original theoretical errors). Remove it completely.

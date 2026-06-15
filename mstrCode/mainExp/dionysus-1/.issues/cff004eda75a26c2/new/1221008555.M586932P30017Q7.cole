@@ -1,0 +1,9 @@
+From: Dmitriy Morozov <morozov@cs.duke.edu>
+Date: Tue, 11 Mar 2008 04:05:25 -0400
+State: fixed
+Subject: Scale fitness
+Message-Id: <cff004eda75a26c2-0-artemis@metatron>
+
+When computing fitness persistence, divide all values by the maximum fitness.
+That way it's possible to compare persistence diagrams for runs in different
+environments.

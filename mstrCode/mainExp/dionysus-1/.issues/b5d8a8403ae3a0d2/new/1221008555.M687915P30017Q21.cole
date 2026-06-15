@@ -1,0 +1,7 @@
+From: Dmitriy Morozov <morozov@cs.duke.edu>
+Date: Thu, 21 Feb 2008 04:54:00 -0500
+State: fixed
+Subject: Segfault in tests/geometry/test-kinetic-sort.cpp
+Message-Id: <b5d8a8403ae3a0d2-0-artemis@metatron>
+
+test-kinetic-sort segfaults when we subscribe to geometry/simulator RLog channel.

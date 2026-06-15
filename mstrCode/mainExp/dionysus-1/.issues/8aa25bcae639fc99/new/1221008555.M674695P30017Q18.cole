@@ -1,0 +1,8 @@
+From: Dmitriy Morozov <morozov@cs.duke.edu>
+Date: Fri, 04 Apr 2008 11:18:00
+State: fixed
+Subject: Switch in the pairing in Case 1.2
+Message-Id: <8aa25bcae639fc99-0-artemis@moscow>
+
+If simplex i is unpaired in Case 1.2, while i+1 is paired with l, and R[i,l]=1
+there is a switch in the pairing in Case 1.2.

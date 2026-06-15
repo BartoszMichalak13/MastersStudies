@@ -1,0 +1,11 @@
+From: Dmitriy Morozov <dmitriy@mrzv.org>
+Date: Sat, 20 Dec 2008 21:24:59
+State: new
+Subject: Add field arithmetic
+Message-Id: <f6496b3e37275888-0-artemis@rufus>
+category: functionality
+
+Add support for field arithmetic (i.e., not only Z_2 field as it is now).
+However, make sure that there is a specialization of ChainWrapper<C>::add() for
+Z_2 field (since it can be made much more efficient both in terms of space and
+time).

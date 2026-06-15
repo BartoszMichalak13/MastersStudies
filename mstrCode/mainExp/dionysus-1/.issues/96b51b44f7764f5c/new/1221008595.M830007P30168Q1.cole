@@ -1,0 +1,8 @@
+From: Dmitriy Morozov <dmitriy@mrzv.org>
+Date: Tue, 09 Sep 2008 18:03:00
+State: resolved
+Subject: Boost 1.36
+Message-Id: <96b51b44f7764f5c-0-artemis@cole>
+resolution: fixed
+
+Make the software compile with Boost 1.36

@@ -1,0 +1,9 @@
+From: Dmitriy Morozov <dmitriy@mrzv.org>
+Date: Sun, 07 Feb 2010 10:45:04
+Subject: Switched to Boost's MultiIndex
+Message-Id: <ebda8db3f9908e33-e9c51216e26b5e19-artemis@vine>
+References: <ebda8db3f9908e33-0-artemis@metatron>
+In-Reply-To: <ebda8db3f9908e33-0-artemis@metatron>
+
+Switched EventQueue to Boost's MultiIndex with a sequence and ordered_non_unique
+indexing.

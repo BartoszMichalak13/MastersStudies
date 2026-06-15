@@ -1,0 +1,15 @@
+From: Dmitriy Morozov <morozov@cs.duke.edu>
+Date: Tue, 26 Feb 2008 18:22:06 -0500
+State: new
+Subject: Get rid of intostring() and .c_str()
+Message-Id: <89ae955518665a61-0-artemis@metatron>
+
+Get rid of the need for intostring() (in addition to tostring()), and having to
+place .c_str() after tostring() in rLog calls.
+
+The former is necessary because of some problem with disambiguating which
+operator<<(ostream,T) to use when Event is being output, so intostring() calls
+T.operator<<(ostream) explicitly. This problem seems to exist only for Events.
+
+It should be possible to solve the latter by returning char* from tostring()
+rather than std::string.

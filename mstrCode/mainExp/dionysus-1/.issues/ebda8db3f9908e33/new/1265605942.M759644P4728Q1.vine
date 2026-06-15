@@ -1,0 +1,9 @@
+From: Dmitriy Morozov <dmitriy@mrzv.org>
+Date: Sun, 07 Feb 2010 21:11:12
+Subject: Binary heap
+Message-Id: <ebda8db3f9908e33-e780beb990f99293-artemis@vine>
+References: <ebda8db3f9908e33-0-artemis@metatron>
+In-Reply-To: <ebda8db3f9908e33-0-artemis@metatron>
+
+Changed EventQueue representation to a binary heap. Used code developed by Danny
+Tarlow and Yanbin Lu.

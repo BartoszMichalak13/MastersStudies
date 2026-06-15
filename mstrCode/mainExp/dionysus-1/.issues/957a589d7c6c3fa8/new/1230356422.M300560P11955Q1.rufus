@@ -1,0 +1,11 @@
+From: Dmitriy Morozov <dmitriy@mrzv.org>
+Date: Fri, 26 Dec 2008 21:34:29
+State: new
+Subject: namespace dionysus
+Message-Id: <957a589d7c6c3fa8-0-artemis@rufus>
+category: installation
+
+Put everything in namespace dionysus. Besides making things more organized, it
+will also allow us to get rid of the problem of having to typedef Simplex<...>
+to Smplx. If it were in dionysus namespace, then 
+`typedef dionysus::Simplex<...> Simplex;` would work.

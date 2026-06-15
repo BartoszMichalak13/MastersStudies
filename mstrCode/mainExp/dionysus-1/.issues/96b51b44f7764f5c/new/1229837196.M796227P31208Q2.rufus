@@ -1,0 +1,9 @@
+From: Dmitriy Morozov <dmitriy@mrzv.org>
+Date: Sat, 20 Dec 2008 21:26:36
+Subject: properties changes (state, resolution)
+Message-Id: <96b51b44f7764f5c-85f856488e2d4827-artemis@rufus>
+References: <96b51b44f7764f5c-0-artemis@cole>
+In-Reply-To: <96b51b44f7764f5c-0-artemis@cole>
+
+state=resolved
+resolution=fixed

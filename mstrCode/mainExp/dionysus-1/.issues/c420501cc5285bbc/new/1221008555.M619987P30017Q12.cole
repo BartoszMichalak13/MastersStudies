@@ -1,0 +1,8 @@
+From: Dmitriy Morozov <morozov@cs.duke.edu>
+Date: Wed, 19 Mar 2008 12:47:24 -0400
+Subject: Fixed in 0a18d6902a55
+Message-Id: <c420501cc5285bbc-db67b15857938f7b-artemis@metatron>
+References: <c420501cc5285bbc-0-artemis@metatron>
+In-Reply-To: <c420501cc5285bbc-0-artemis@metatron>
+
+Fixed by dealing with infinite simplices in 0a18d6902a55

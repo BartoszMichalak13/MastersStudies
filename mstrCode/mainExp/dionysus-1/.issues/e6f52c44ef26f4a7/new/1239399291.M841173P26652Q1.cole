@@ -1,0 +1,10 @@
+From: Dmitriy Morozov <dmitriy@mrzv.org>
+Date: Fri, 10 Apr 2009 14:33:18
+State: new
+Subject: Intrusive containers for ZigzagPersistence
+Message-Id: <e6f52c44ef26f4a7-0-artemis@cole>
+category: efficiency
+
+Use Boost's intrusive containers to store rows in ZigzagPersistence. This
+should get rid of the inefficiencies associated with the simplex removal
+(through ZigzagPersistence::remove()).

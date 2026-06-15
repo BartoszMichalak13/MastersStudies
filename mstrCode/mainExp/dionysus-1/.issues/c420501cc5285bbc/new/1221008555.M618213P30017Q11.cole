@@ -1,0 +1,10 @@
+From: Dmitriy Morozov <morozov@cs.duke.edu>
+Date: Tue, 26 Feb 2008 08:00:50 -0500
+Subject: Fixed by adding CGAL_NO_ASSERTIONS
+Message-Id: <c420501cc5285bbc-d75d85d67d421f7e-artemis@metatron>
+References: <c420501cc5285bbc-0-artemis@metatron>
+In-Reply-To: <c420501cc5285bbc-0-artemis@metatron>
+
+I suspect the bug in CGAL (since everything works fine with CGAL_NO_ASSERTIONS
+set), so I disabled the offending assertion (and all the rest of them) by
+setting a CXX flag in CMakeLists.txt.

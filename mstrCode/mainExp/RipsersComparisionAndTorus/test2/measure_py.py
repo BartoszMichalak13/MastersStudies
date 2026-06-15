@@ -8,12 +8,17 @@ if __name__ == "__main__":
     points_file = sys.argv[1]
     dim = int(sys.argv[2])
 
+    thresh = float(sys.argv[3]) if len(sys.argv) > 3 else None
     # Load points
     points = np.loadtxt(points_file, delimiter=',')
     
     # Run ripser and measure time
     start_time = time.time()
-    res = ripser(points, maxdim=dim, coeff=2)
+    if thresh and thresh > 0:
+        res = ripser(points, maxdim=dim, coeff=2, thresh=thresh)
+    else:
+        # Domyślne zachowanie (enclosing radius -> gigantyczne zużycie RAM)
+        res = ripser(points, maxdim=dim, coeff=2)
     end_time = time.time()
 
     # Get peak RAM from the OS

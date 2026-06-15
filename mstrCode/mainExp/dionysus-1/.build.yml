@@ -1,0 +1,20 @@
+image: archlinux
+triggers:
+  - action: email
+    condition: failure
+    to: Dmitriy Morozov <dmitriy@mrzv.org>
+packages:
+  - cmake
+  - boost
+  - boost-libs
+  - cgal
+sources:
+  - hg+https://hg.sr.ht/~mrzv/dionysus1
+tasks:
+  - configure: |
+      mkdir dionysus1/build
+      cd dionysus1/build
+      cmake .. -Duse_cgal=off
+  - build: |
+      cd dionysus1/build
+      make

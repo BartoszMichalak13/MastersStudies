@@ -1,0 +1,9 @@
+From: Dmitriy Morozov <morozov@cs.duke.edu>
+Date: Fri, 22 Feb 2008 18:39:31 -0500
+State: new
+Subject: Incorrect sign_at() in UPolynomial<double>
+Message-Id: <cd79223a108d3900-0-artemis@metatron>
+category: kinetic
+
+UPolynomial<double>::sign_at() reports -1 as the sign of -2*x + 4 at x = 2. 
+Should be 0.

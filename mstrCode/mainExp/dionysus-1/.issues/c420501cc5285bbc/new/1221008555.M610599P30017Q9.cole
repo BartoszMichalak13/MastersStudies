@@ -1,0 +1,8 @@
+From: Dmitriy Morozov <morozov@cs.duke.edu>
+Date: Tue, 26 Feb 2008 05:22:56 -0500
+State: fixed
+Subject: Non-optimized CGAL runtime error
+Message-Id: <c420501cc5285bbc-0-artemis@metatron>
+
+If the code is compiled with optimizations off or with debug on, CGAL gives a
+runtime error.

@@ -1,0 +1,11 @@
+From: Dmitriy Morozov <dmitriy@mrzv.org>
+Date: Sat, 20 Dec 2008 21:21:53
+State: new
+Subject: Specialize ChainWrapper<C>::add() for linked lists
+Message-Id: <de674a2ac5f6c18c-0-artemis@rufus>
+category: functionality
+
+The current implementation of add() in ChainWrapper is container agnostic: it
+uses a temporary container, and then swaps it into place. There should be a
+specialized add() for linked lists (in particular, List from circular_list.h)
+since it is would likely be more efficient then the generic one.

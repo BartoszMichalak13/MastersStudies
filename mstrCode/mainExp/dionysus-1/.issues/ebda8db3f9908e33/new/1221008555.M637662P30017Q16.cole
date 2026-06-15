@@ -1,0 +1,9 @@
+From: Dmitriy Morozov <morozov@cs.duke.edu>
+Date: Mon, 25 Feb 2008 11:29:27 -0500
+State: resolved
+Subject: Efficient EventQueue
+Message-Id: <ebda8db3f9908e33-0-artemis@metatron>
+category: kinetic
+resolution: fixed
+
+Change EventQueue to an efficient implementation, e.g., using a Fibonacci heap.

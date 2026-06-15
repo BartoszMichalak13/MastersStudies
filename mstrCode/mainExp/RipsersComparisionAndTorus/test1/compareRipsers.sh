@@ -2,7 +2,7 @@
 
 # Settings
 DIM=2
-NUM_POINTS=600
+NUM_POINTS=1000
 POINTS_FILE="points.txt"
 CPP_LOG="ripser_cpp.txt"
 CPP_STATS="ripser_cpp_stats.txt"

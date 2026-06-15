@@ -1,0 +1,10 @@
+From: Dmitriy Morozov <morozov@cs.duke.edu>
+Date: Wed, 09 Jan 2008 13:57:57 -0500
+State: new
+Subject: Change cout to rlog
+Message-Id: <e8659770a6824e01-0-artemis@metatron>
+
+In examples/grid/grid2Dvineyard.hpp (and in examples in general),
+change the use of std::cout for logging information to rlog.
+Naturally, create appropriate channels even if they are of only local
+use.

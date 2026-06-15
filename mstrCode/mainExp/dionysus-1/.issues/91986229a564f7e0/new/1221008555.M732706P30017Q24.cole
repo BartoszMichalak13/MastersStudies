@@ -1,0 +1,8 @@
+From: Dmitriy Morozov <morozov@cs.duke.edu>
+Date: Thu, 21 Feb 2008 04:23:29 -0500
+State: fixed
+Subject: More elabroate domain in avida-landscape
+Message-Id: <91986229a564f7e0-0-artemis@metatron>
+
+Try minimum spanning tree (i.e., take only negative edges from avida-distance).
+Try a combination: all edges up to a certain (realtively small) length + MST.

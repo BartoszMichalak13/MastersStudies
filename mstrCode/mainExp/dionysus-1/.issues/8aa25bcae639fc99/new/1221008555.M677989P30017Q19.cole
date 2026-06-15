@@ -1,0 +1,8 @@
+From: Dmitriy Morozov <morozov@cs.duke.edu>
+Date: Fri, 04 Apr 2008 16:16:41
+Subject: Handled but mislabeled
+Message-Id: <8aa25bcae639fc99-bbca170318887f06-artemis@moscow>
+References: <8aa25bcae639fc99-0-artemis@moscow>
+In-Reply-To: <8aa25bcae639fc99-0-artemis@moscow>
+
+The situation is already handled in the code, but was mislabeled as Case 1.1.2
